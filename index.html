@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Trainer</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- standalone page only; when embedded, the host page controls body -->
+  <style>body { margin: 0; background: #f7f8fc; min-height: 100vh; }</style>
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, { delimiters: [
+      {left: '$$', right: '$$', display: true},
+      {left: '$', right: '$', display: false}
+    ]});"></script>
+</head>
+<body>
+
+<div class="math-trainer" id="math-trainer">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="logo">Math Trainer</span>
+      <nav class="breadcrumb" id="breadcrumb">
+        <span class="breadcrumb-item active" data-view="home">Home</span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HOME VIEW: topic cards -->
+  <main id="view-home" class="view active">
+    <section class="hero">
+      <h1>Practice Math</h1>
+      <p>Pick a topic and start solving. No login needed.</p>
+    </section>
+
+    <section class="topic-grid">
+
+      <div class="topic-card" data-topic="equations">
+        <div class="topic-icon">&#x3D;</div>
+        <h2>Equations</h2>
+        <p>Linear, quadratic and more</p>
+      </div>
+
+      <!-- placeholder cards, greyed out for now -->
+      <div class="topic-card disabled">
+        <div class="topic-icon">&#x3C;</div>
+        <h2>Inequalities</h2>
+        <p>Coming soon</p>
+      </div>
+
+      <div class="topic-card disabled">
+        <div class="topic-icon">&#x192;</div>
+        <h2>Functions &amp; Graphs</h2>
+        <p>Coming soon</p>
+      </div>
+
+      <div class="topic-card disabled">
+        <div class="topic-icon">&#x25B3;</div>
+        <h2>Geometry</h2>
+        <p>Coming soon</p>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- EQUATIONS VIEW: subtopic list -->
+  <main id="view-equations" class="view">
+    <section class="subtopic-header">
+      <h1>Equations</h1>
+      <p>Choose a type to practice</p>
+    </section>
+
+    <section class="subtopic-list">
+
+      <div class="subtopic-card" data-subtopic="linear-basic">
+        <div class="subtopic-meta">
+          <span class="difficulty easy">Beginner</span>
+        </div>
+        <h3>Linear Equations — Basic</h3>
+        <p>One-step equations like $2x = 8$ or $x + 5 = 12$</p>
+      </div>
+
+      <div class="subtopic-card" data-subtopic="linear-twoStep">
+        <div class="subtopic-meta">
+          <span class="difficulty medium">Intermediate</span>
+        </div>
+        <h3>Linear Equations — Two-step</h3>
+        <p>Equations like $3x + 4 = 19$ or $\frac{x}{2} - 3 = 5$</p>
+      </div>
+
+      <div class="subtopic-card" data-subtopic="linear-bothSides">
+        <div class="subtopic-meta">
+          <span class="difficulty medium">Intermediate</span>
+        </div>
+        <h3>Linear Equations — Variables on Both Sides</h3>
+        <p>Equations like $5x - 3 = 2x + 9$</p>
+      </div>
+
+      <div class="subtopic-card disabled">
+        <div class="subtopic-meta">
+          <span class="difficulty hard">Advanced</span>
+        </div>
+        <h3>Quadratic Equations</h3>
+        <p>Coming soon</p>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- PRACTICE VIEW: the actual exercise -->
+  <main id="view-practice" class="view">
+
+    <div class="practice-container">
+
+      <!-- problem display -->
+      <div class="problem-box">
+        <div class="problem-label">Solve for $x$:</div>
+        <div class="problem-equation" id="problem-equation"><!-- filled by JS --></div>
+      </div>
+
+      <!-- answer input -->
+      <div class="answer-area">
+        <div class="answer-row">
+          <span class="answer-prefix">$x =$</span>
+          <input
+            type="text"
+            id="answer-input"
+            placeholder="your answer"
+            autocomplete="off"
+            inputmode="decimal"
+          />
+          <button class="btn btn-primary" id="btn-check">Check</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <!-- action buttons -->
+      <div class="practice-actions">
+        <button class="btn btn-secondary" id="btn-next">Next problem</button>
+        <button class="btn btn-ghost" id="btn-steps">Show step-by-step solution</button>
+      </div>
+
+      <!-- step-by-step solution (hidden by default) -->
+      <div class="steps-box" id="steps-box" style="display:none;">
+        <h3>Solution</h3>
+        <ol class="steps-list" id="steps-list"><!-- filled by JS --></ol>
+      </div>
+
+    </div>
+
+  </main>
+
+</div><!-- /.math-trainer -->
+
+  <script src="js/equations.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
