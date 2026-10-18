@@ -9,23 +9,25 @@
    Root container & design tokens
    ============================================================ */
 .math-trainer {
-  --clr-bg:        #f7f8fc;
-  --clr-surface:   #ffffff;
-  --clr-border:    #e2e5ef;
-  --clr-primary:   #1a73e8;
+  --clr-bg: #f7f8fc;
+  --clr-surface: #ffffff;
+  --clr-border: #e2e5ef;
+  --clr-primary: #1a73e8;
   --clr-primary-h: #1557b0;
-  --clr-text:      #1d2433;
-  --clr-muted:     #6b7280;
-  --clr-success:   #16a34a;
-  --clr-error:     #dc2626;
-  --clr-easy:      #dcfce7;
+  --clr-text: #1d2433;
+  --clr-muted: #6b7280;
+  --clr-success: #16a34a;
+  --clr-retry:      #f59e0b;   /* wrong answer / solved with retries */
+  --clr-retry-bg:   #fffbeb;
+  --clr-retry-text: #b45309;
+  --clr-easy: #dcfce7;
   --clr-easy-text: #166534;
-  --clr-med:       #fef9c3;
-  --clr-med-text:  #854d0e;
-  --clr-hard:      #fee2e2;
+  --clr-med: #fef9c3;
+  --clr-med-text: #854d0e;
+  --clr-hard: #fee2e2;
   --clr-hard-text: #991b1b;
-  --radius:        12px;
-  --shadow:        0 1px 4px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+  --radius: 12px;
+  --shadow: 0 1px 4px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .06);
   --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   font-family: var(--font);
@@ -80,10 +82,10 @@
 /* ============================================================
    Header
    ============================================================ */
-.math-trainer .site-header {
+/*.math-trainer .site-header {
   background: var(--clr-surface);
   border-bottom: 1px solid var(--clr-border);
-}
+}*/
 
 .math-trainer .header-inner {
   max-width: 900px;
@@ -156,11 +158,13 @@
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 8px;
+  text-align: center;
 }
 
 .math-trainer .hero p {
   color: var(--clr-muted);
   font-size: 1rem;
+  text-align: center;
 }
 
 /* ============================================================
@@ -173,6 +177,7 @@
 }
 
 .math-trainer .topic-card {
+  text-align: center;
   background: var(--clr-surface);
   border: 1px solid var(--clr-border);
   border-radius: var(--radius);
@@ -265,9 +270,20 @@
   letter-spacing: .04em;
 }
 
-.math-trainer .difficulty.easy   { background: var(--clr-easy);  color: var(--clr-easy-text); }
-.math-trainer .difficulty.medium { background: var(--clr-med);   color: var(--clr-med-text);  }
-.math-trainer .difficulty.hard   { background: var(--clr-hard);  color: var(--clr-hard-text); }
+.math-trainer .difficulty.easy {
+  background: var(--clr-easy);
+  color: var(--clr-easy-text);
+}
+
+.math-trainer .difficulty.medium {
+  background: var(--clr-med);
+  color: var(--clr-med-text);
+}
+
+.math-trainer .difficulty.hard {
+  background: var(--clr-hard);
+  color: var(--clr-hard-text);
+}
 
 .math-trainer .subtopic-card h3 {
   font-size: 1rem;
@@ -285,6 +301,70 @@
    ============================================================ */
 .math-trainer .practice-container {
   max-width: 600px;
+}
+
+/* Session progress */
+.math-trainer .progress {
+  margin-bottom: 20px;
+}
+
+.math-trainer .progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--clr-muted);
+  margin-bottom: 8px;
+}
+
+.math-trainer .progress-track {
+  display: flex;
+  gap: 4px;
+}
+
+.math-trainer .progress-seg {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--clr-border);
+  transition: background .2s;
+}
+
+.math-trainer .progress-seg.current {
+  background: #bfdbfe;
+}
+
+.math-trainer .progress-seg.correct {
+  background: var(--clr-success);
+}
+
+.math-trainer .progress-seg.skipped {
+  background: var(--clr-border);
+}
+
+/* Set complete panel */
+.math-trainer .session-complete {
+  margin-top: 28px;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+}
+
+.math-trainer .session-complete h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.math-trainer .session-complete p {
+  color: var(--clr-muted);
+  margin-bottom: 18px;
+}
+
+.math-trainer .session-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .math-trainer .problem-box {
@@ -351,8 +431,8 @@
 }
 
 .math-trainer #answer-input.incorrect {
-  border-color: var(--clr-error);
-  background: #fef2f2;
+  border-color: var(--clr-retry);
+  background: var(--clr-retry-bg);
 }
 
 /* Feedback */
@@ -363,8 +443,13 @@
   min-height: 24px;
 }
 
-.math-trainer .feedback.correct   { color: var(--clr-success); }
-.math-trainer .feedback.incorrect { color: var(--clr-error); }
+.math-trainer .feedback.correct {
+  color: var(--clr-success);
+}
+
+.math-trainer .feedback.incorrect {
+  color: var(--clr-retry-text);
+}
 
 /* ============================================================
    Buttons
@@ -492,10 +577,28 @@
    Responsive
    ============================================================ */
 @media (max-width: 480px) {
-  .math-trainer .view { padding: 24px 16px 60px; }
-  .math-trainer .problem-box { padding: 24px 20px; }
-  .math-trainer .problem-equation { font-size: 1.2rem; }
-  .math-trainer .answer-row { flex-wrap: wrap; }
-  .math-trainer #answer-input { max-width: 100%; width: 100%; }
-  .math-trainer .steps-box { padding: 20px 18px; }
+  .math-trainer .view {
+    padding: 24px 16px 60px;
+  }
+
+  .math-trainer .problem-box {
+    padding: 24px 20px;
+  }
+
+  .math-trainer .problem-equation {
+    font-size: 1.2rem;
+  }
+
+  .math-trainer .answer-row {
+    flex-wrap: wrap;
+  }
+
+  .math-trainer #answer-input {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .math-trainer .steps-box {
+    padding: 20px 18px;
+  }
 }

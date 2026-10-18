@@ -34,7 +34,7 @@
   <main id="view-home" class="view active">
     <section class="hero">
       <h1>Practice Math</h1>
-      <p>Pick a topic and start solving. No login needed.</p>
+      <p>Pick a topic and start solving.</p>
     </section>
 
     <section class="topic-grid">
@@ -116,6 +116,15 @@
 
     <div class="practice-container">
 
+      <!-- session progress (10 problems per set) -->
+      <div class="progress">
+        <div class="progress-header">
+          <span id="progress-count"></span>
+          <span id="progress-score"></span>
+        </div>
+        <div class="progress-track" id="progress-track"><!-- segments filled by JS --></div>
+      </div>
+
       <!-- problem display -->
       <div class="problem-box">
         <div class="problem-label">Solve for $x$:</div>
@@ -144,6 +153,16 @@
         <button class="btn btn-ghost" id="btn-steps">Show step-by-step solution</button>
       </div>
 
+      <!-- set complete: repeat level or move on (hidden by default) -->
+      <div class="session-complete" id="session-complete" style="display:none;">
+        <h3>Set complete!</h3>
+        <p id="session-summary"></p>
+        <div class="session-actions">
+          <button class="btn" id="btn-next-level"></button>
+          <button class="btn" id="btn-repeat">10 more at this level</button>
+        </div>
+      </div>
+
       <!-- step-by-step solution (hidden by default) -->
       <div class="steps-box" id="steps-box" style="display:none;">
         <h3>Solution</h3>
@@ -156,6 +175,7 @@
 
 </div><!-- /.math-trainer -->
 
+  <script src="js/texts.js"></script>
   <script src="js/equations.js"></script>
   <script src="js/ui.js"></script>
 </body>

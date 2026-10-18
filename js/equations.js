@@ -94,17 +94,17 @@ function generateLinearBasic() {
       answer: x,
       steps: [
         {
-          explanation: 'Write the original equation.',
+          explanation: TEXTS.solution.original,
           math: `x ${aStr} = ${b}`
         },
         {
           explanation: a > 0
-            ? `Subtract ${a} from both sides to isolate $x$.`
-            : `Add ${Math.abs(a)} to both sides to isolate $x$.`,
+            ? TEXTS.solution.subtractIsolate(a)
+            : TEXTS.solution.addIsolate(Math.abs(a)),
           math: `x ${aStr} ${a > 0 ? `- ${a}` : `+ ${Math.abs(a)}`} = ${b} ${a > 0 ? `- ${a}` : `+ ${Math.abs(a)}`}`
         },
         {
-          explanation: 'Simplify.',
+          explanation: TEXTS.solution.simplify,
           math: `x = ${x}`
         }
       ]
@@ -123,15 +123,15 @@ function generateLinearBasic() {
       answer: x,
       steps: [
         {
-          explanation: 'Write the original equation.',
+          explanation: TEXTS.solution.original,
           math: `${lhs} = ${b}`
         },
         {
-          explanation: `Divide both sides by ${a > 0 ? a : `(${a})`}.`,
+          explanation: TEXTS.solution.divide(a),
           math: `\\dfrac{${lhs}}{${a}} = \\dfrac{${b}}{${a}}`
         },
         {
-          explanation: 'Simplify.',
+          explanation: TEXTS.solution.simplify,
           math: `x = ${x}`
         }
       ]
@@ -161,21 +161,21 @@ function generateLinearTwoStep() {
     answer: x,
     steps: [
       {
-        explanation: 'Write the original equation.',
+        explanation: TEXTS.solution.original,
         math: `${lhsA} ${bStr} = ${c}`
       },
       {
         explanation: b > 0
-          ? `Subtract ${b} from both sides.`
-          : `Add ${Math.abs(b)} to both sides.`,
+          ? TEXTS.solution.subtract(b)
+          : TEXTS.solution.add(Math.abs(b)),
         math: `${lhsA} = ${rhs2}`
       },
       {
-        explanation: `Divide both sides by ${a}.`,
+        explanation: TEXTS.solution.divide(a),
         math: `\\dfrac{${lhsA}}{${a}} = \\dfrac{${rhs2}}{${a}}`
       },
       {
-        explanation: 'Simplify.',
+        explanation: TEXTS.solution.simplify,
         math: `x = ${x}`
       }
     ]
@@ -215,25 +215,25 @@ function generateLinearBothSides() {
     answer: x,
     steps: [
       {
-        explanation: 'Write the original equation.',
+        explanation: TEXTS.solution.original,
         math: `${lhsA} ${bStr} = ${rhsC} ${dStr}`
       },
       {
-        explanation: `Subtract $${rhsC}$ from both sides to move variable terms to the left.`,
+        explanation: TEXTS.solution.moveVariable(rhsC),
         math: `${lhsAfter} ${bStr} = ${dActual}`
       },
       {
         explanation: b > 0
-          ? `Subtract ${b} from both sides.`
-          : `Add ${Math.abs(b)} to both sides.`,
+          ? TEXTS.solution.subtract(b)
+          : TEXTS.solution.add(Math.abs(b)),
         math: `${lhsAfter} = ${diff}`
       },
       {
-        explanation: `Divide both sides by ${k}.`,
+        explanation: TEXTS.solution.divide(k),
         math: `\\dfrac{${lhsAfter}}{${k}} = \\dfrac{${diff}}{${k}}`
       },
       {
-        explanation: 'Simplify.',
+        explanation: TEXTS.solution.simplify,
         math: `x = ${x}`
       }
     ]
