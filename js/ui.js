@@ -16,17 +16,24 @@ let shownKind       = null;   // 'solve' | 'simplify': what the practice screen 
 /**
  * {
  *   subtopic, index, finished,
- *   items: [{ problem, solved, hadHelp, input, wrong, stepsOpen }]
+ *   items: [{ problem, solved, inputs, wrong, bad, stepsOpen }]
  * }
- *  hadHelp  — a wrong attempt or the solution was opened before solving
- *  wrong    — the last check of the current input was wrong (to restore the hint)
+ *  inputs   — what is typed in each answer field
+ *  wrong    — the last check was wrong (to restore the hint); bad = indexes of the wrong fields
  */
 let session = null;
 
 const SESSION_LENGTH = 10;     // problems per set
-const PASS_THRESHOLD = 7;      // first-try solves needed to suggest the next level
+const PASS_THRESHOLD = 7;      // solved problems (of 10) needed to suggest the next level
 
 const currentItem = () => session.items[session.index];
+
+/** The answer fields on screen, in order */
+const inputEls = () => [...answerInputs.querySelectorAll('input')];
+
+/** How many fields a problem needs: one per interval / solution when the answer is a set, else one */
+const answerCount = problem =>
+  (problem && (problem.kind === 'intervals' || problem.kind === 'numbers')) ? problem.answer.length : 1;
 
 // ─── completed levels (remembered in the browser) ─────────────────────────────
 const COMPLETED_KEY = 'math-trainer-completed';
@@ -79,16 +86,17 @@ const views = {
   home:      document.getElementById('view-home'),
   equations: document.getElementById('view-equations'),
   expressions: document.getElementById('view-expressions'),
+  inequalities: document.getElementById('view-inequalities'),
   practice:  document.getElementById('view-practice'),
 };
 
 const breadcrumb      = document.getElementById('breadcrumb');
-const TOPICS          = ['equations', 'expressions'];   // views that list subtopic cards
+const TOPICS          = ['equations', 'expressions', 'inequalities'];   // views that list subtopic cards
 
 const problemLabel    = document.getElementById('problem-label');
 const problemEquation = document.getElementById('problem-equation');
-const answerPrefix    = document.getElementById('answer-prefix');
-const answerInput     = document.getElementById('answer-input');
+const answerInputs    = document.getElementById('answer-inputs');   // holds one input per expected answer
+const answerHint      = document.getElementById('answer-hint');
 const feedback        = document.getElementById('feedback');
 const btnCheck        = document.getElementById('btn-check');
 const btnPrev         = document.getElementById('btn-prev');
@@ -212,14 +220,17 @@ function startSession() {
     subtopic: currentSubtopic,
     index:    0,
     finished: false,
-    items: Array.from({ length: SESSION_LENGTH }, () => ({
-      problem:   generateProblem(currentSubtopic),
-      solved:    false,
-      hadHelp:   false,
-      input:     '',
-      wrong:     false,
-      stepsOpen: false,
-    })),
+    items: Array.from({ length: SESSION_LENGTH }, () => {
+      const problem = generateProblem(currentSubtopic);
+      return {
+        problem,
+        solved:    false,
+        inputs:    Array(answerCount(problem)).fill(''),
+        wrong:     false,
+        bad:       [],
+        stepsOpen: false,
+      };
+    }),
   };
   showProblem();
 }
@@ -227,7 +238,7 @@ function startSession() {
 /** Move to problem i (0-based), remembering what was typed in the current one */
 function goTo(i) {
   if (i < 0 || i >= SESSION_LENGTH || i === session.index) return;
-  currentItem().input = answerInput.value;
+  currentItem().inputs = inputEls().map(el => el.value);
   session.index = i;
   showProblem();
 }
@@ -254,11 +265,10 @@ function renderProgress() {
 
 function renderSessionComplete() {
   const solved  = session.items.filter(it => it.solved).length;
-  const correct = session.items.filter(it => it.solved && !it.hadHelp).length;
-  const passed  = correct >= PASS_THRESHOLD;
+  const passed  = solved >= PASS_THRESHOLD;
   const next    = getNextLevel();
 
-  sessionSummary.textContent = TEXTS.session.summary(solved, SESSION_LENGTH, correct) + ' ' +
+  sessionSummary.textContent = TEXTS.session.summary(solved, SESSION_LENGTH) + ' ' +
     (passed ? TEXTS.session.passed : TEXTS.session.notPassed);
 
   btnNextLevel.textContent = next ? TEXTS.session.nextLevel(next.label) : TEXTS.session.backToTopics;
@@ -294,17 +304,78 @@ function updateNav() {
 }
 
 // ─── problem lifecycle ────────────────────────────────────────────────────────
-/** Label, input prefix, placeholder and keyboard depend on the answer type */
+/** Label, "x =" prefix and hint depend on the answer type */
 function setupForKind(kind) {
   if (kind === shownKind) return;
   shownKind = kind;
 
-  const simplify = kind === 'simplify';
-  problemLabel.textContent    = simplify ? TEXTS.practice.simplifyLabel : TEXTS.practice.solveLabel;
+  const labels = {
+    solve:     TEXTS.practice.solveLabel,
+    numbers:   TEXTS.practice.solveLabel,
+    simplify:  TEXTS.practice.simplifyLabel,
+    intervals: TEXTS.practice.inequalityLabel,
+  };
+  const hints = {
+    numbers:   TEXTS.practice.numbersHint,
+    intervals: TEXTS.practice.intervalHint,
+  };
+  problemLabel.textContent = labels[kind];
   renderKatex(problemLabel);
-  answerPrefix.style.display  = simplify ? 'none' : '';   // "x =" only for equations
-  answerInput.placeholder     = simplify ? TEXTS.practice.expressionPlaceholder : TEXTS.practice.numberPlaceholder;
-  answerInput.inputMode       = simplify ? 'text' : 'decimal';
+
+  answerHint.textContent   = hints[kind] || '';
+  answerHint.style.display = hints[kind] ? '' : 'none';
+}
+
+/** Inline formula that waits for KaTeX if it is not loaded yet */
+function renderInline(el, latex, tries = 0) {
+  if (window.katex) {
+    katex.render(latex, el, { throwOnError: false, displayMode: false });
+  } else {
+    el.textContent = latex;
+    if (tries < 10) setTimeout(() => renderInline(el, latex, tries + 1), 300);
+  }
+}
+
+let inputsBuiltFor = null;
+
+/** Create the answer fields (placeholder and keyboard depend on the answer type) */
+function buildInputs(kind, count) {
+  const key = `${kind}:${count}`;
+  if (key === inputsBuiltFor) return;
+  inputsBuiltFor = key;
+
+  const placeholders = {
+    solve:     TEXTS.practice.numberPlaceholder,
+    numbers:   TEXTS.practice.numberPlaceholder,
+    simplify:  TEXTS.practice.expressionPlaceholder,
+    intervals: TEXTS.practice.intervalPlaceholder,
+  };
+  const numeric = kind === 'solve' || kind === 'numbers';   // answers like "x = 5"
+
+  answerInputs.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const field = document.createElement('div');
+    field.className = 'answer-field';
+
+    if (numeric) {
+      const prefix = document.createElement('span');
+      prefix.className = 'answer-prefix';
+      renderInline(prefix, 'x =');
+      field.appendChild(prefix);
+    }
+
+    const el = document.createElement('input');
+    el.type         = 'text';
+    el.className    = 'answer-input';
+    el.placeholder  = placeholders[kind];
+    // plain text keyboard: the numeric/decimal ones on phones have no minus sign or "/"
+    el.inputMode    = 'text';
+    el.autocomplete = 'off';
+    el.spellcheck   = false;
+    el.setAttribute('autocapitalize', 'off');
+    field.appendChild(el);
+    answerInputs.appendChild(field);
+  }
 }
 
 /** Draw the current problem with everything the user has already done on it */
@@ -313,21 +384,25 @@ function showProblem() {
   if (!item.problem) return;
 
   renderLatexInto(problemEquation, item.problem.latex);
-  setupForKind(item.problem.kind || 'solve');
+  const kind = item.problem.kind || 'solve';
+  setupForKind(kind);
+  buildInputs(kind, answerCount(item.problem));
 
   // answer area
-  answerInput.value    = item.input;
-  answerInput.readOnly = item.solved;   // readOnly (not disabled) so Enter still moves on
+  inputEls().forEach((el, i) => {
+    el.value    = item.inputs[i] || '';
+    el.readOnly = item.solved;   // readOnly (not disabled) so Enter still moves on
+    el.classList.remove('correct', 'incorrect');
+    if (item.solved)                           el.classList.add('correct');
+    else if (item.wrong && item.bad.includes(i)) el.classList.add('incorrect');
+  });
   btnCheck.disabled    = item.solved;
-  answerInput.classList.remove('correct', 'incorrect');
   feedback.className   = 'feedback';
   feedback.textContent = '';
   if (item.solved) {
-    answerInput.classList.add('correct');
     feedback.textContent = TEXTS.feedback.correct;
     feedback.className   = 'feedback correct';
   } else if (item.wrong) {
-    answerInput.classList.add('incorrect');
     feedback.textContent = TEXTS.feedback.wrong;
     feedback.className   = 'feedback incorrect';
   }
@@ -340,37 +415,62 @@ function showProblem() {
 
   renderProgress();
   updateNav();
-  answerInput.focus();
+  inputEls()[0].focus();
 }
 
 // ─── answer checking ──────────────────────────────────────────────────────────
 /**
- * Compare what the user typed with the problem's answer.
- * Returns { status: 'correct' | 'wrong' | 'hint', message? }
+ * Compare what the user typed (one string per field) with the problem's answer.
+ * Returns { status: 'correct' | 'wrong' | 'hint', message?, bad? }
  *  hint — the input can't be judged yet (not a number, brackets left...); not an attempt
+ *  bad  — for 'wrong': indexes of the fields that are wrong
  */
-function judgeAnswer(rawInput, problem) {
+function judgeAnswer(rawInputs, problem) {
+  if (problem.kind === 'intervals') {
+    if (rawInputs.some(v => v.trim() === '')) {
+      return { status: 'hint', message: rawInputs.length > 1 ? TEXTS.feedback.fillAll : TEXTS.feedback.notAnInterval };
+    }
+    const parsed = rawInputs.map(parseInterval);
+    if (parsed.some(p => p.error)) return { status: 'hint', message: TEXTS.feedback.notAnInterval };
+
+    const bad = unmatchedIntervals(parsed.map(p => p.interval), problem.answer);
+    return bad.length ? { status: 'wrong', bad } : { status: 'correct' };
+  }
+
+  if (problem.kind === 'numbers') {
+    if (rawInputs.some(v => v.trim() === '')) {
+      return { status: 'hint', message: rawInputs.length > 1 ? TEXTS.feedback.fillAll : TEXTS.feedback.notANumber };
+    }
+    const parsed = rawInputs.map(parseNumber);
+    if (parsed.some(p => p.error)) return { status: 'hint', message: TEXTS.feedback.notANumber };
+
+    const bad = unmatchedNumbers(parsed.map(p => p.value), problem.answer);
+    return bad.length ? { status: 'wrong', bad } : { status: 'correct' };
+  }
+
+  const rawInput = rawInputs[0];
+
   if (problem.kind === 'simplify') {
     const parsed = parsePolynomial(rawInput);
     if (parsed.error === 'brackets') return { status: 'hint', message: TEXTS.feedback.expandFirst };
     if (parsed.error === 'combine')  return { status: 'hint', message: TEXTS.feedback.combineLike };
     if (parsed.error)                return { status: 'hint', message: TEXTS.feedback.notAnExpression };
-    return { status: polyEquals(parsed.coeffs, problem.answer) ? 'correct' : 'wrong' };
+    return polyEquals(parsed.coeffs, problem.answer) ? { status: 'correct' } : { status: 'wrong', bad: [0] };
   }
 
-  const raw   = rawInput.trim().replace(',', '.');
-  const value = parseFloat(raw);
-  if (raw === '' || isNaN(value)) return { status: 'hint', message: TEXTS.feedback.notANumber };
+  const parsed = parseNumber(rawInput);
+  if (parsed.error) return { status: 'hint', message: TEXTS.feedback.notANumber };
 
-  // compare with small epsilon for floats (answers here are always integers)
-  return { status: Math.abs(value - problem.answer) < 1e-9 ? 'correct' : 'wrong' };
+  // compare with small epsilon for floats
+  return Math.abs(parsed.value - problem.answer) < 1e-9 ? { status: 'correct' } : { status: 'wrong', bad: [0] };
 }
 
 function checkAnswer() {
   const item = currentItem();
   if (item.solved) return;
 
-  const verdict = judgeAnswer(answerInput.value, item.problem);
+  const values  = inputEls().map(el => el.value);
+  const verdict = judgeAnswer(values, item.problem);
 
   if (verdict.status === 'hint') {
     feedback.textContent = verdict.message;
@@ -378,21 +478,23 @@ function checkAnswer() {
     return;
   }
 
-  item.input = answerInput.value;
+  item.inputs = values;
 
   if (verdict.status === 'wrong') {
     // let the user fix it; the answer stays hidden (it's in the step-by-step solution)
-    item.hadHelp = true;
     item.wrong   = true;
-    answerInput.classList.add('incorrect');
+    item.bad     = verdict.bad;
+    const els = inputEls();
+    verdict.bad.forEach(i => els[i].classList.add('incorrect'));
     feedback.textContent = TEXTS.feedback.wrong;
     feedback.className   = 'feedback incorrect';
-    answerInput.select();
+    els[verdict.bad[0]].select();
     return;
   }
 
   item.solved = true;
   item.wrong  = false;
+  item.bad    = [];
   showProblem();
 
   if (session.items.every(it => it.solved)) finishSession();
@@ -402,7 +504,6 @@ function checkAnswer() {
 function toggleSteps() {
   const item = currentItem();
   item.stepsOpen = !item.stepsOpen;
-  if (item.stepsOpen && !item.solved) item.hadHelp = true;
   applySteps();
 }
 
@@ -500,22 +601,31 @@ btnNext.addEventListener('click',  () => {
 btnSteps.addEventListener('click', toggleSteps);
 btnRepeat.addEventListener('click', startSession);
 
-// Remember the input and clear the "wrong" state as soon as the user edits the answer
-answerInput.addEventListener('input', () => {
+// Remember what is typed and clear the "wrong" state of a field as soon as it is edited
+answerInputs.addEventListener('input', e => {
   const item = currentItem();
   if (item.solved) return;
-  item.input = answerInput.value;
-  item.wrong = false;
-  answerInput.classList.remove('incorrect');
+  const i = inputEls().indexOf(e.target);
+  item.inputs[i] = e.target.value;
+  item.bad       = item.bad.filter(b => b !== i);
+  item.wrong     = item.bad.length > 0;
+  e.target.classList.remove('incorrect');
   feedback.textContent = '';
   feedback.className   = 'feedback';
 });
 
-// Enter: check the answer, or go on to the next problem once solved
-answerInput.addEventListener('keydown', e => {
+// Enter: move to the next field, check on the last one, or go on to the next problem once solved
+answerInputs.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
-  if (!currentItem().solved) checkAnswer();
-  else if (session.index < SESSION_LENGTH - 1) goTo(session.index + 1);
+  const els = inputEls();
+  const i   = els.indexOf(e.target);
+
+  if (!currentItem().solved) {
+    if (i < els.length - 1) els[i + 1].focus();
+    else                    checkAnswer();
+  } else if (session.index < SESSION_LENGTH - 1) {
+    goTo(session.index + 1);
+  }
 });
 
 // ─── init ─────────────────────────────────────────────────────────────────────

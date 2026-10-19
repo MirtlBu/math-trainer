@@ -109,12 +109,21 @@
   white-space: nowrap;
 }
 
+.math-trainer .logo-mark {
+  /* the ± glyph sits on the baseline; lift it to line up with the middle of the text */
+  position: relative;
+  top: -1px;
+  left: 5px;
+  font-size: 1.3rem;
+}
+
 .math-trainer .breadcrumb {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 1rem;
   color: var(--clr-muted);
+  margin-top: 3px;
 }
 
 .math-trainer .breadcrumb-item {
@@ -444,7 +453,7 @@
 
 .math-trainer .answer-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;   /* Check stays next to the last input when there are several */
   gap: 12px;
 }
 
@@ -454,10 +463,30 @@
   min-width: 36px;
 }
 
-.math-trainer #answer-input {
+/* one field per expected answer: optional "x =" in front, then the input */
+.math-trainer .answer-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   flex: 1;
+  max-width: 320px;
+}
+
+.math-trainer .answer-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.math-trainer .answer-hint {
+  margin-top: 10px;
+  color: var(--clr-muted);
+}
+
+.math-trainer .answer-input {
+  flex: 1;
+  min-width: 0;
   width: auto;
-  max-width: 260px;
   height: 44px;
   padding: 0 14px;
   border: 2px solid var(--clr-border);
@@ -470,16 +499,16 @@
   outline: none;
 }
 
-.math-trainer #answer-input:focus {
+.math-trainer .answer-input:focus {
   border-color: var(--clr-primary);
 }
 
-.math-trainer #answer-input.correct {
+.math-trainer .answer-input.correct {
   border-color: var(--clr-success);
   background: #f0fdf4;
 }
 
-.math-trainer #answer-input.incorrect {
+.math-trainer .answer-input.incorrect {
   border-color: var(--clr-retry);
   background: var(--clr-retry-bg);
 }
@@ -732,7 +761,7 @@
     flex-wrap: wrap;
   }
 
-  .math-trainer #answer-input {
+  .math-trainer .answer-inputs {
     max-width: 100%;
     width: 100%;
   }

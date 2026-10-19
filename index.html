@@ -30,7 +30,7 @@
     <!-- HEADER -->
     <header class="site-header">
       <div class="header-inner">
-        <span class="logo">Math Trainer</span>
+        <span class="logo"><span class="logo-mark" aria-hidden="true">&plusmn;</span> Math Trainer</span>
         <nav class="breadcrumb" id="breadcrumb">
           <span class="breadcrumb-item active" data-view="home">Home</span>
         </nav>
@@ -49,7 +49,7 @@
         <div class="topic-card" data-topic="equations">
           <div class="topic-icon">&#x3D;</div>
           <h2>Equations</h2>
-          <p>Linear, quadratic and more</p>
+          <p>From linear to quartic</p>
         </div>
 
         <div class="topic-card" data-topic="expressions">
@@ -59,10 +59,10 @@
         </div>
 
         <!-- placeholder cards, greyed out for now -->
-        <div class="topic-card disabled">
+        <div class="topic-card" data-topic="inequalities">
           <div class="topic-icon">&#x3C;</div>
           <h2>Inequalities</h2>
-          <p>Coming soon</p>
+          <p>From linear to quartic</p>
         </div>
 
         <div class="topic-card disabled">
@@ -113,12 +113,44 @@
           <p>Equations like $5x - 3 = 2x + 9$</p>
         </div>
 
-        <div class="subtopic-card disabled">
+        <div class="subtopic-card" data-subtopic="quad-factored">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Quadratic Equations — Factored Form</h3>
+          <p>Equations like $(x - 2)(x + 5) = 0$ or $(2x - 3)(x + 1) = 0$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="quad-incomplete">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Quadratic Equations — Incomplete</h3>
+          <p>Equations like $x^2 = 49$, $3x^2 = 48$ or $3x^2 - 12x = 0$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="quad-general">
           <div class="subtopic-meta">
             <span class="difficulty hard">Advanced</span>
           </div>
-          <h3>Quadratic Equations</h3>
-          <p>Coming soon</p>
+          <h3>Quadratic Equations — General Form</h3>
+          <p>Equations like $x^2 + 5x + 6 = 0$ or $2x^2 - 6x - 20 = 0$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="cubic">
+          <div class="subtopic-meta">
+            <span class="difficulty hard">Advanced</span>
+          </div>
+          <h3>Cubic Equations</h3>
+          <p>Equations like $x^3 + 5x^2 + 6x = 0$ or $x^3 - 3x^2 - 4x + 12 = 0$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="quartic">
+          <div class="subtopic-meta">
+            <span class="difficulty hard">Advanced</span>
+          </div>
+          <h3>Quartic Equations</h3>
+          <p>Equations like $x^4 - 5x^2 + 4 = 0$ or $x^4 = 81$</p>
         </div>
 
       </section>
@@ -160,6 +192,58 @@
       </section>
     </main>
 
+    <!-- INEQUALITIES VIEW: subtopic list -->
+    <main id="view-inequalities" class="view" data-topic="inequalities">
+      <section class="subtopic-header">
+        <h1>Inequalities</h1>
+        <p>Choose a type to practice</p>
+      </section>
+
+      <section class="subtopic-list">
+
+        <div class="subtopic-card" data-subtopic="ineq-linear">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Linear Inequalities</h3>
+          <p>Inequalities like $3x - 5 > 7$ or $-2x + 1 \le 9$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="ineq-product">
+          <div class="subtopic-meta">
+            <span class="difficulty hard">Advanced</span>
+          </div>
+          <h3>Inequalities in Factored Form</h3>
+          <p>Inequalities like $(x + 2)(x - 3) > 0$ or $x(x + 2)(x + 3) \ge 0$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="ineq-quadratic">
+          <div class="subtopic-meta">
+            <span class="difficulty hard">Advanced</span>
+          </div>
+          <h3>Quadratic Inequalities</h3>
+          <p>Inequalities like $x^2 - 5x + 6 < 0$ or $-x^2 + 4x + 5 \ge 0$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="ineq-cubic">
+          <div class="subtopic-meta">
+            <span class="difficulty hard">Advanced</span>
+          </div>
+          <h3>Cubic Inequalities</h3>
+          <p>Inequalities like $x^3 + 5x^2 + 6x > 0$ or $x^3 - 3x^2 - 4x + 12 \le 0$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="ineq-quartic">
+          <div class="subtopic-meta">
+            <span class="difficulty hard">Advanced</span>
+          </div>
+          <h3>Quartic Inequalities</h3>
+          <p>Inequalities like $x^4 - 5x^2 + 4 \le 0$ or $x^4 - 81 > 0$</p>
+        </div>
+
+      </section>
+    </main>
+
     <!-- PRACTICE VIEW: the actual exercise -->
     <main id="view-practice" class="view">
 
@@ -188,10 +272,11 @@
             <!-- answer input -->
             <div class="answer-area">
               <div class="answer-row">
-                <span class="answer-prefix" id="answer-prefix">$x =$</span>
-                <input type="text" id="answer-input" placeholder="your answer" autocomplete="off" inputmode="decimal" />
+                <!-- one input per expected answer, created by JS -->
+                <div class="answer-inputs" id="answer-inputs"></div>
                 <button class="btn btn-primary" id="btn-check">Check</button>
               </div>
+              <div class="answer-hint" id="answer-hint" style="display:none;"></div>
               <div class="feedback" id="feedback"></div>
             </div>
 
@@ -238,8 +323,12 @@
 
   <script src="js/texts.js"></script>
   <script src="js/polynomial.js"></script>
+  <script src="js/intervals.js"></script>
+  <script src="js/numbers.js"></script>
   <script src="js/equations.js"></script>
   <script src="js/expressions.js"></script>
+  <script src="js/polynomial-equations.js"></script>
+  <script src="js/inequalities.js"></script>
   <script src="js/ui.js"></script>
 </body>
 

@@ -12,19 +12,26 @@ const TEXTS = {
     home: 'Home',
     equations: 'Equations',
     expressions: 'Expressions',
+    inequalities: 'Inequalities',
   },
 
   // ─── practice screen ────────────────────────────────────────────────────────
   practice: {
     solveLabel: 'Solve for $x$:',
     simplifyLabel: 'Expand and simplify:',
+    inequalityLabel: 'Solve the inequality:',
     numberPlaceholder: 'your answer',
     expressionPlaceholder: 'e.g. 5x^2 - 3x + 1',
+    intervalPlaceholder: 'e.g. x > 1',
+    numbersHint: 'One field per solution, in any order. Fractions like 3/2 are fine.',
+    intervalHint: 'One field per interval. Write each as an inequality (x > 4, -3 <= x < 2) or with brackets ((-3, 2], (-inf, 1)).',
   },
 
   // ─── answer checking ────────────────────────────────────────────────────────
   feedback: {
     notANumber: 'Please enter a number.',
+    notAnInterval: 'Please enter an interval like x > 4, -3 < x < 2 or (-3, 2].',
+    fillAll: 'Please fill in all the fields.',
     notAnExpression: 'Please enter an expression like 5x^2 - 3x + 1.',
     expandFirst: 'Expand the brackets first, the answer should have none.',
     combineLike: 'Combine like terms: each power of x should appear once.',
@@ -48,7 +55,7 @@ const TEXTS = {
 
   // ─── end of set ─────────────────────────────────────────────────────────────
   session: {
-    summary: (solved, total, firstTry) => `You solved ${solved} of ${total}.`,
+    summary: (solved, total) => `You solved ${solved} of ${total}.`,
     nextProblem: 'Next problem',
     finish: 'Finish set',
     passed: 'Nice work!',
@@ -61,12 +68,43 @@ const TEXTS = {
   solution: {
     original: 'Write the original equation.',
     originalExpression: 'Write the original expression.',
+    originalInequality: 'Write the original inequality.',
+    divideNegative: (n) => `Divide both sides by (${n}). Dividing by a negative number reverses the inequality sign.`,
+    findRoots: 'Find the roots: set each factor equal to zero.',
+    findZeros: 'Find where the expression equals zero: solve the equation.',
+    signTable: (leadPositive) =>
+      'The roots split the number line into intervals. To the right of the largest root the expression is ' +
+      (leadPositive ? 'positive' : 'negative (the leading coefficient is negative)') +
+      ', and its sign changes at every root.',
+    pickIntervals: (positive, strict) =>
+      `Take the intervals where the expression is ${positive ? 'positive' : 'negative'}` +
+      (strict ? '.' : ', and include the roots (square brackets) because equality is allowed.'),
     distribute: 'Multiply the term outside the brackets by each term inside.',
     distributeAll: 'Multiply each term of the first bracket by each term of the second.',
     multiplyPowers: 'Multiply the coefficients and the powers of $x$ ($x \\cdot x = x^2$).',
     multiplyOut: 'Calculate each product.',
     combineLike: 'Combine like terms.',
     simplify: 'Simplify.',
+    // quadratic, cubic and quartic equations
+    zeroProduct: 'A product is zero when at least one of its factors is zero.',
+    solveEach: 'Solve each equation.',
+    rootsAre: 'The solutions are:',
+    moveAllLeft: 'Move all terms to the left side.',
+    vieta: (sum, product) => `Find two numbers whose sum is ${sum} and whose product is ${product}.`,
+    factorQuadratic: 'Write the quadratic in factored form.',
+    discriminant: 'Calculate the discriminant $D = b^2 - 4ac$.',
+    quadraticFormula: 'Use the quadratic formula.',
+    sqrtBoth: 'Take the square root of both sides: there are two solutions, one positive and one negative.',
+    factorCommon: 'Factor out the common factor.',
+    factorOutX: 'Factor out $x$.',
+    zeroProductQuad: 'A product is zero when a factor is zero: $x = 0$, or the quadratic in the brackets is zero.',
+    groupTerms: 'Group the terms in pairs and factor each pair.',
+    factorCommonBracket: 'Factor out the common bracket.',
+    diffSquares: 'Factor the difference of squares: $a^2 - b^2 = (a - b)(a + b)$.',
+    substitute: 'Substitute $t = x^2$ to get a quadratic equation.',
+    backToX: 'Go back to $x$: replace $t$ by $x^2$.',
+    noRealRoots: (c) => `The equation $x^2 = -${c}$ has no real solutions, so only $x^2 = ${c}$ counts.`,
+    alwaysPositive: (c) => `The factor $x^2 + ${c}$ is always positive, so it does not change the sign.`,
     // n is the number being added/subtracted; always positive here
     subtract: (n) => `Subtract ${n} from both sides.`,
     add: (n) => `Add ${n} to both sides.`,
