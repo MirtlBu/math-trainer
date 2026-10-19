@@ -240,6 +240,7 @@
 }
 
 .math-trainer .subtopic-card {
+  position: relative;
   background: var(--clr-surface);
   border: 1px solid var(--clr-border);
   border-radius: var(--radius);
@@ -256,6 +257,27 @@
 .math-trainer .subtopic-card.disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* green check on completed levels */
+.math-trainer .subtopic-check {
+  display: none;
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  width: 24px;
+  height: 24px;
+  color: var(--clr-success);
+}
+
+.math-trainer .subtopic-check svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.math-trainer .subtopic-card.completed .subtopic-check {
+  display: block;
 }
 
 .math-trainer .subtopic-meta {
@@ -411,6 +433,8 @@
 .math-trainer .problem-equation {
   font-size: 1.5rem;
   text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 /* Answer area */
@@ -433,7 +457,7 @@
 .math-trainer #answer-input {
   flex: 1;
   width: auto;
-  max-width: 180px;
+  max-width: 260px;
   height: 44px;
   padding: 0 14px;
   border: 2px solid var(--clr-border);
@@ -541,7 +565,67 @@
   background: var(--clr-surface);
   border: 1px solid var(--clr-border);
   border-radius: var(--radius);
-  padding: 28px 32px;
+  position: relative;
+  overflow: hidden;   /* clips the scroller and the edge fades to the rounded corners */
+}
+
+/* fades on the left / right edge, shown only while there is more to scroll that way
+   (the classes are set by updateStepsFade in ui.js) */
+.math-trainer .steps-box::before,
+.math-trainer .steps-box::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 36px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 1;
+}
+
+.math-trainer .steps-box::before {
+  left: 0;
+  background: linear-gradient(to right, var(--clr-surface), transparent);
+}
+
+.math-trainer .steps-box::after {
+  right: 0;
+  background: linear-gradient(to left, var(--clr-surface), transparent);
+}
+
+.math-trainer .steps-box.fade-left::before,
+.math-trainer .steps-box.fade-right::after {
+  opacity: 1;
+}
+
+/* the whole solution scrolls sideways when a formula is too wide;
+   the scrollbar is styled so it stays visible instead of hiding like the system overlay one */
+.math-trainer .steps-scroll {
+  --pad-x: 32px;
+  padding: 28px var(--pad-x);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #b4bccb var(--clr-bg);
+}
+
+.math-trainer .steps-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.math-trainer .steps-scroll::-webkit-scrollbar-track {
+  background: var(--clr-bg);
+}
+
+.math-trainer .steps-scroll::-webkit-scrollbar-thumb {
+  background: #b4bccb;
+  border-radius: 5px;
+  border: 2px solid var(--clr-bg);
+}
+
+.math-trainer .steps-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-muted);
 }
 
 .math-trainer .steps-box h3 {
@@ -562,7 +646,7 @@
 .math-trainer .steps-list li {
   counter-increment: step-counter;
   display: grid;
-  grid-template-columns: 28px 1fr;
+  grid-template-columns: 28px minmax(0, 1fr);   /* minmax(0,…): let long formulas shrink the column instead of overflowing */
   gap: 14px;
   align-items: start;
 }
@@ -595,7 +679,26 @@
 }
 
 .math-trainer .step-math {
-  font-size: 1.05rem;
+  font-size: 1rem;
+  padding: 10px 0 12px;   /* breathing room around the formula */
+  /* may be wider than the column: the extra width scrolls with the whole solution box.
+     content-box + padding-right: the browser ignores the scroller's own right padding for
+     overflowing content, so this keeps the same space at the right end as at the left.
+     For short formulas the extra padding sits inside the scroller's padding, so nothing scrolls. */
+  box-sizing: content-box;
+  width: max-content;
+  min-width: 100%;
+  padding-right: var(--pad-x);
+}
+
+/* KaTeX adds vertical margins to display formulas; the block has its own padding */
+.math-trainer .step-math .katex-display {
+  margin: 0;
+}
+
+/* formulas at the same size as paragraphs; scoped so the host site's own KaTeX is untouched */
+.math-trainer .katex {
+  font-size: 1rem;
 }
 
 /* ============================================================
@@ -634,7 +737,8 @@
     width: 100%;
   }
 
-  .math-trainer .steps-box {
-    padding: 20px 18px;
+  .math-trainer .steps-scroll {
+    --pad-x: 18px;
+    padding: 20px var(--pad-x);
   }
 }

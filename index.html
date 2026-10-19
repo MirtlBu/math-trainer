@@ -52,6 +52,12 @@
           <p>Linear, quadratic and more</p>
         </div>
 
+        <div class="topic-card" data-topic="expressions">
+          <div class="topic-icon">x&#xB2;</div>
+          <h2>Expressions</h2>
+          <p>Expand brackets and simplify</p>
+        </div>
+
         <!-- placeholder cards, greyed out for now -->
         <div class="topic-card disabled">
           <div class="topic-icon">&#x3C;</div>
@@ -75,7 +81,7 @@
     </main>
 
     <!-- EQUATIONS VIEW: subtopic list -->
-    <main id="view-equations" class="view">
+    <main id="view-equations" class="view" data-topic="equations">
       <section class="subtopic-header">
         <h1>Equations</h1>
         <p>Choose a type to practice</p>
@@ -118,6 +124,42 @@
       </section>
     </main>
 
+    <!-- EXPRESSIONS VIEW: subtopic list -->
+    <main id="view-expressions" class="view" data-topic="expressions">
+      <section class="subtopic-header">
+        <h1>Expressions</h1>
+        <p>Choose a type to practice</p>
+      </section>
+
+      <section class="subtopic-list">
+
+        <div class="subtopic-card" data-subtopic="expand-number">
+          <div class="subtopic-meta">
+            <span class="difficulty easy">Beginner</span>
+          </div>
+          <h3>Expanding Brackets — Number × Brackets</h3>
+          <p>Expressions like $4 \cdot (3x - 2)$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="expand-monomial">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Expanding Brackets — Monomial × Brackets</h3>
+          <p>Expressions like $4x \cdot (3x - 2)$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="expand-binomials">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Expanding Brackets — Brackets × Brackets</h3>
+          <p>Expressions like $(4x - 2) \cdot (3x + 2)$</p>
+        </div>
+
+      </section>
+    </main>
+
     <!-- PRACTICE VIEW: the actual exercise -->
     <main id="view-practice" class="view">
 
@@ -139,14 +181,14 @@
 
             <!-- problem display -->
             <div class="problem-box">
-              <div class="problem-label">Solve for $x$:</div>
+              <div class="problem-label" id="problem-label"><!-- filled by JS --></div>
               <div class="problem-equation" id="problem-equation"><!-- filled by JS --></div>
             </div>
 
             <!-- answer input -->
             <div class="answer-area">
               <div class="answer-row">
-                <span class="answer-prefix">$x =$</span>
+                <span class="answer-prefix" id="answer-prefix">$x =$</span>
                 <input type="text" id="answer-input" placeholder="your answer" autocomplete="off" inputmode="decimal" />
                 <button class="btn btn-primary" id="btn-check">Check</button>
               </div>
@@ -167,8 +209,11 @@
             <button class="btn btn-secondary" id="btn-steps">Step-by-step solution</button>
 
             <div class="steps-box" id="steps-box" style="display:none;">
-              <h3>Solution</h3>
-              <ol class="steps-list" id="steps-list"><!-- filled by JS --></ol>
+              <!-- the scrolling part; the box itself keeps its border and the edge fades -->
+              <div class="steps-scroll" id="steps-scroll">
+                <h3>Solution</h3>
+                <ol class="steps-list" id="steps-list"><!-- filled by JS --></ol>
+              </div>
             </div>
 
           </div><!-- /right column -->
@@ -192,7 +237,9 @@
   </div><!-- /.math-trainer -->
 
   <script src="js/texts.js"></script>
+  <script src="js/polynomial.js"></script>
   <script src="js/equations.js"></script>
+  <script src="js/expressions.js"></script>
   <script src="js/ui.js"></script>
 </body>
 

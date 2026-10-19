@@ -9,7 +9,9 @@
  */
 
 // ─── state ────────────────────────────────────────────────────────────────────
+let currentTopic    = null;   // 'equations' | 'expressions'
 let currentSubtopic = null;
+let shownKind       = null;   // 'solve' | 'simplify': what the practice screen is set up for
 
 /**
  * {
@@ -26,15 +28,66 @@ const PASS_THRESHOLD = 7;      // first-try solves needed to suggest the next le
 
 const currentItem = () => session.items[session.index];
 
+// ─── completed levels (remembered in the browser) ─────────────────────────────
+const COMPLETED_KEY = 'math-trainer-completed';
+
+function loadCompleted() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(COMPLETED_KEY)) || []);
+  } catch (e) {
+    return new Set();   // storage blocked or corrupted: start empty
+  }
+}
+
+const completed = loadCompleted();
+
+/** A level counts as completed once the user moves on from its finished set */
+function markCompleted(subtopic) {
+  completed.add(subtopic);
+  try {
+    localStorage.setItem(COMPLETED_KEY, JSON.stringify([...completed]));
+  } catch (e) { /* not saved, still shown until the page is closed */ }
+  renderCompleted();
+}
+
+/** Green check on the subtopic cards of completed levels */
+function renderCompleted() {
+  document.querySelectorAll('.subtopic-card[data-subtopic]').forEach(card => {
+    card.classList.toggle('completed', completed.has(card.dataset.subtopic));
+  });
+}
+
+/** Add the (initially hidden) check icon to every subtopic card */
+function addCheckIcons() {
+  document.querySelectorAll('.subtopic-card[data-subtopic]').forEach(card => {
+    const icon = document.createElement('span');
+    icon.className = 'subtopic-check';
+    icon.title = TEXTS.progress.levelCompleted;
+    icon.setAttribute('role', 'img');
+    icon.setAttribute('aria-label', TEXTS.progress.levelCompleted);
+    icon.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="12" fill="currentColor"/>' +
+      '<path d="M7 12.5l3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2.4" ' +
+      'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    card.appendChild(icon);
+  });
+}
+
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
 const views = {
   home:      document.getElementById('view-home'),
   equations: document.getElementById('view-equations'),
+  expressions: document.getElementById('view-expressions'),
   practice:  document.getElementById('view-practice'),
 };
 
 const breadcrumb      = document.getElementById('breadcrumb');
+const TOPICS          = ['equations', 'expressions'];   // views that list subtopic cards
+
+const problemLabel    = document.getElementById('problem-label');
 const problemEquation = document.getElementById('problem-equation');
+const answerPrefix    = document.getElementById('answer-prefix');
 const answerInput     = document.getElementById('answer-input');
 const feedback        = document.getElementById('feedback');
 const btnCheck        = document.getElementById('btn-check');
@@ -42,6 +95,7 @@ const btnPrev         = document.getElementById('btn-prev');
 const btnNext         = document.getElementById('btn-next');
 const btnSteps        = document.getElementById('btn-steps');
 const stepsBox        = document.getElementById('steps-box');
+const stepsScroll     = document.getElementById('steps-scroll');
 const stepsList       = document.getElementById('steps-list');
 const progressCount   = document.getElementById('progress-count');
 const progressScore   = document.getElementById('progress-score');
@@ -62,23 +116,26 @@ function goHome() {
   setBreadcrumb([{ label: TEXTS.nav.home, view: 'home' }]);
 }
 
-function goEquations() {
-  showView('equations');
+/** Subtopic list of a topic ('equations' or 'expressions') */
+function goTopic(topic) {
+  currentTopic = topic;
+  showView(topic);
   setBreadcrumb([
-    { label: TEXTS.nav.home, view: 'home' },
-    { label: TEXTS.nav.equations, view: 'equations' },
+    { label: TEXTS.nav.home,  view: 'home' },
+    { label: TEXTS.nav[topic], view: topic },
   ]);
   // Re-render KaTeX in the subtopic list (cards contain inline math)
-  renderKatex(views.equations);
+  renderKatex(views[topic]);
 }
 
-function goPractice(subtopic, label) {
+function goPractice(topic, subtopic, label) {
+  currentTopic    = topic;
   currentSubtopic = subtopic;
   showView('practice');
   setBreadcrumb([
-    { label: TEXTS.nav.home,      view: 'home' },
-    { label: TEXTS.nav.equations, view: 'equations' },
-    { label: label,       view: null },
+    { label: TEXTS.nav.home,   view: 'home' },
+    { label: TEXTS.nav[topic], view: topic },
+    { label: label,            view: null },
   ]);
 
   // coming back to the same level resumes the set; another level starts a new one
@@ -88,7 +145,7 @@ function goPractice(subtopic, label) {
 
 /** Next enabled subtopic after the current one (in the order shown on the page), or null */
 function getNextLevel() {
-  const cards = [...views.equations.querySelectorAll('.subtopic-card:not(.disabled)')];
+  const cards = [...views[currentTopic].querySelectorAll('.subtopic-card:not(.disabled)')];
   const i = cards.findIndex(c => c.dataset.subtopic === currentSubtopic);
   const next = cards[i + 1];
   if (!next) return null;
@@ -104,8 +161,8 @@ function setBreadcrumb(items) {
     span.textContent = item.label;
     if (item.view && i < items.length - 1) {
       span.addEventListener('click', () => {
-        if (item.view === 'home')      goHome();
-        if (item.view === 'equations') goEquations();
+        if (item.view === 'home') goHome();
+        else                      goTopic(item.view);
       });
     }
     breadcrumb.appendChild(span);
@@ -120,7 +177,7 @@ function setBreadcrumb(items) {
 }
 
 // ─── KaTeX rendering ──────────────────────────────────────────────────────────
-function renderKatex(container) {
+function renderKatex(container, tries = 0) {
   // auto-render is loaded via CDN with onload; this re-runs it on a subtree
   if (window.renderMathInElement) {
     renderMathInElement(container, {
@@ -130,6 +187,9 @@ function renderKatex(container) {
       ],
       throwOnError: false,
     });
+  } else if (tries < 10) {
+    // KaTeX not loaded yet — try again shortly
+    setTimeout(() => renderKatex(container, tries + 1), 300);
   }
 }
 
@@ -202,9 +262,12 @@ function renderSessionComplete() {
     (passed ? TEXTS.session.passed : TEXTS.session.notPassed);
 
   btnNextLevel.textContent = next ? TEXTS.session.nextLevel(next.label) : TEXTS.session.backToTopics;
-  btnNextLevel.onclick = next
-    ? () => goPractice(next.subtopic, next.label)
-    : goEquations;
+  // moving on from a finished set marks the level as completed
+  btnNextLevel.onclick = () => {
+    markCompleted(currentSubtopic);
+    if (next) goPractice(currentTopic, next.subtopic, next.label);
+    else      goTopic(currentTopic);
+  };
 
   // highlight the recommended option
   btnNextLevel.className = 'btn ' + (passed ? 'btn-primary' : 'btn-secondary');
@@ -231,12 +294,26 @@ function updateNav() {
 }
 
 // ─── problem lifecycle ────────────────────────────────────────────────────────
+/** Label, input prefix, placeholder and keyboard depend on the answer type */
+function setupForKind(kind) {
+  if (kind === shownKind) return;
+  shownKind = kind;
+
+  const simplify = kind === 'simplify';
+  problemLabel.textContent    = simplify ? TEXTS.practice.simplifyLabel : TEXTS.practice.solveLabel;
+  renderKatex(problemLabel);
+  answerPrefix.style.display  = simplify ? 'none' : '';   // "x =" only for equations
+  answerInput.placeholder     = simplify ? TEXTS.practice.expressionPlaceholder : TEXTS.practice.numberPlaceholder;
+  answerInput.inputMode       = simplify ? 'text' : 'decimal';
+}
+
 /** Draw the current problem with everything the user has already done on it */
 function showProblem() {
   const item = currentItem();
   if (!item.problem) return;
 
   renderLatexInto(problemEquation, item.problem.latex);
+  setupForKind(item.problem.kind || 'solve');
 
   // answer area
   answerInput.value    = item.input;
@@ -267,25 +344,43 @@ function showProblem() {
 }
 
 // ─── answer checking ──────────────────────────────────────────────────────────
+/**
+ * Compare what the user typed with the problem's answer.
+ * Returns { status: 'correct' | 'wrong' | 'hint', message? }
+ *  hint — the input can't be judged yet (not a number, brackets left...); not an attempt
+ */
+function judgeAnswer(rawInput, problem) {
+  if (problem.kind === 'simplify') {
+    const parsed = parsePolynomial(rawInput);
+    if (parsed.error === 'brackets') return { status: 'hint', message: TEXTS.feedback.expandFirst };
+    if (parsed.error === 'combine')  return { status: 'hint', message: TEXTS.feedback.combineLike };
+    if (parsed.error)                return { status: 'hint', message: TEXTS.feedback.notAnExpression };
+    return { status: polyEquals(parsed.coeffs, problem.answer) ? 'correct' : 'wrong' };
+  }
+
+  const raw   = rawInput.trim().replace(',', '.');
+  const value = parseFloat(raw);
+  if (raw === '' || isNaN(value)) return { status: 'hint', message: TEXTS.feedback.notANumber };
+
+  // compare with small epsilon for floats (answers here are always integers)
+  return { status: Math.abs(value - problem.answer) < 1e-9 ? 'correct' : 'wrong' };
+}
+
 function checkAnswer() {
   const item = currentItem();
   if (item.solved) return;
 
-  const raw   = answerInput.value.trim().replace(',', '.');
-  const value = parseFloat(raw);
+  const verdict = judgeAnswer(answerInput.value, item.problem);
 
-  if (raw === '' || isNaN(value)) {
-    feedback.textContent = TEXTS.feedback.notANumber;
+  if (verdict.status === 'hint') {
+    feedback.textContent = verdict.message;
     feedback.className   = 'feedback incorrect';
     return;
   }
 
   item.input = answerInput.value;
 
-  // compare with small epsilon for floats (answers here are always integers)
-  const correct = Math.abs(value - item.problem.answer) < 1e-9;
-
-  if (!correct) {
+  if (verdict.status === 'wrong') {
     // let the user fix it; the answer stays hidden (it's in the step-by-step solution)
     item.hadHelp = true;
     item.wrong   = true;
@@ -317,6 +412,8 @@ function applySteps() {
   if (item.stepsOpen) {
     renderSteps(item.problem);
     stepsBox.style.display = 'block';
+    stepsScroll.scrollLeft = 0;
+    updateStepsFade();
     btnSteps.textContent   = TEXTS.steps.hide;
   } else {
     stepsBox.style.display = 'none';
@@ -324,6 +421,16 @@ function applySteps() {
     btnSteps.textContent   = TEXTS.steps.show;
   }
 }
+
+/** Show the edge fades only on the sides where the solution can still be scrolled */
+function updateStepsFade() {
+  const max = stepsScroll.scrollWidth - stepsScroll.clientWidth;
+  stepsBox.classList.toggle('fade-left',  stepsScroll.scrollLeft > 2);
+  stepsBox.classList.toggle('fade-right', stepsScroll.scrollLeft < max - 2);
+}
+
+// formulas change width after KaTeX / its fonts finish loading, so each one is watched
+const stepsObserver = window.ResizeObserver ? new ResizeObserver(updateStepsFade) : null;
 
 function renderSteps(problem) {
   stepsList.innerHTML = '';
@@ -349,6 +456,12 @@ function renderSteps(problem) {
 
   // render any inline KaTeX in explanations
   renderKatex(stepsList);
+
+  if (stepsObserver) {
+    stepsObserver.disconnect();
+    stepsObserver.observe(stepsScroll);
+    stepsList.querySelectorAll('.step-math').forEach(el => stepsObserver.observe(el));
+  }
 }
 
 // ─── event listeners ──────────────────────────────────────────────────────────
@@ -357,18 +470,25 @@ function renderSteps(problem) {
 views.home.querySelectorAll('.topic-card:not(.disabled)').forEach(card => {
   card.addEventListener('click', () => {
     const topic = card.dataset.topic;
-    if (topic === 'equations') goEquations();
+    if (TOPICS.includes(topic)) goTopic(topic);
   });
 });
 
-// Subtopic cards on equations view
-views.equations.querySelectorAll('.subtopic-card:not(.disabled)').forEach(card => {
-  card.addEventListener('click', () => {
-    const subtopic = card.dataset.subtopic;
-    const label    = card.querySelector('h3').textContent;
-    goPractice(subtopic, label);
+// Subtopic cards on each topic view
+TOPICS.forEach(topic => {
+  views[topic].querySelectorAll('.subtopic-card:not(.disabled)').forEach(card => {
+    card.addEventListener('click', () => {
+      const subtopic = card.dataset.subtopic;
+      const label    = card.querySelector('h3').textContent;
+      goPractice(topic, subtopic, label);
+    });
   });
 });
+
+// Edge fades follow the scroll position and any change of size (KaTeX finishing, window resize)
+stepsScroll.addEventListener('scroll', updateStepsFade);
+window.addEventListener('resize', updateStepsFade);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateStepsFade);
 
 // Practice buttons
 btnCheck.addEventListener('click', checkAnswer);
@@ -399,4 +519,6 @@ answerInput.addEventListener('keydown', e => {
 });
 
 // ─── init ─────────────────────────────────────────────────────────────────────
+addCheckIcons();
+renderCompleted();
 goHome();

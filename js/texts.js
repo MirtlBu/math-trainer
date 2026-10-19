@@ -11,11 +11,23 @@ const TEXTS = {
   nav: {
     home: 'Home',
     equations: 'Equations',
+    expressions: 'Expressions',
+  },
+
+  // ─── practice screen ────────────────────────────────────────────────────────
+  practice: {
+    solveLabel: 'Solve for $x$:',
+    simplifyLabel: 'Expand and simplify:',
+    numberPlaceholder: 'your answer',
+    expressionPlaceholder: 'e.g. 5x^2 - 3x + 1',
   },
 
   // ─── answer checking ────────────────────────────────────────────────────────
   feedback: {
     notANumber: 'Please enter a number.',
+    notAnExpression: 'Please enter an expression like 5x^2 - 3x + 1.',
+    expandFirst: 'Expand the brackets first, the answer should have none.',
+    combineLike: 'Combine like terms: each power of x should appear once.',
     wrong: 'Not quite, try again.',
     correct: 'Correct!',
   },
@@ -31,6 +43,7 @@ const TEXTS = {
     current: (n, total) => `Problem ${n} of ${total}`,
     goTo: (n) => `Go to problem ${n}`,
     score: (solved) => `${solved} solved`,
+    levelCompleted: 'Level completed',
   },
 
   // ─── end of set ─────────────────────────────────────────────────────────────
@@ -47,6 +60,12 @@ const TEXTS = {
   // ─── solution steps (equations.js) ──────────────────────────────────────────
   solution: {
     original: 'Write the original equation.',
+    originalExpression: 'Write the original expression.',
+    distribute: 'Multiply the term outside the brackets by each term inside.',
+    distributeAll: 'Multiply each term of the first bracket by each term of the second.',
+    multiplyPowers: 'Multiply the coefficients and the powers of $x$ ($x \\cdot x = x^2$).',
+    multiplyOut: 'Calculate each product.',
+    combineLike: 'Combine like terms.',
     simplify: 'Simplify.',
     // n is the number being added/subtracted; always positive here
     subtract: (n) => `Subtract ${n} from both sides.`,
