@@ -1,17 +1,30 @@
 /**
  * ui.js
  * Handles view routing, problem rendering, answer checking, and step display.
+ *
+ * A "session" is a set of SESSION_LENGTH problems generated up front and kept in
+ * memory, so the user can move back and forth (Prev / Next / progress bar) and find
+ * each problem as they left it. It is replaced when the user starts a new set or
+ * opens a different level.
  */
 
 // ─── state ────────────────────────────────────────────────────────────────────
 let currentSubtopic = null;
-let currentProblem  = null;
-let answered        = false;   // has user solved this problem?
-let hadHelp         = false;   // wrong attempt or solution opened before solving
-let sessionResults  = [];      // per problem: 'first' (clean), 'retry' (with help) or 'skipped'
+
+/**
+ * {
+ *   subtopic, index, finished,
+ *   items: [{ problem, solved, hadHelp, input, wrong, stepsOpen }]
+ * }
+ *  hadHelp  — a wrong attempt or the solution was opened before solving
+ *  wrong    — the last check of the current input was wrong (to restore the hint)
+ */
+let session = null;
 
 const SESSION_LENGTH = 10;     // problems per set
 const PASS_THRESHOLD = 7;      // first-try solves needed to suggest the next level
+
+const currentItem = () => session.items[session.index];
 
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
 const views = {
@@ -25,6 +38,7 @@ const problemEquation = document.getElementById('problem-equation');
 const answerInput     = document.getElementById('answer-input');
 const feedback        = document.getElementById('feedback');
 const btnCheck        = document.getElementById('btn-check');
+const btnPrev         = document.getElementById('btn-prev');
 const btnNext         = document.getElementById('btn-next');
 const btnSteps        = document.getElementById('btn-steps');
 const stepsBox        = document.getElementById('steps-box');
@@ -66,7 +80,10 @@ function goPractice(subtopic, label) {
     { label: TEXTS.nav.equations, view: 'equations' },
     { label: label,       view: null },
   ]);
-  startSession();
+
+  // coming back to the same level resumes the set; another level starts a new one
+  if (session && session.subtopic === subtopic) showProblem();
+  else startSession();
 }
 
 /** Next enabled subtopic after the current one (in the order shown on the page), or null */
@@ -131,34 +148,53 @@ function renderLatexInto(el, latex) {
 
 // ─── session (set of SESSION_LENGTH problems) ─────────────────────────────────
 function startSession() {
-  sessionResults = [];
-  sessionComplete.style.display = 'none';
-  btnNext.style.display = '';
-  loadNewProblem();
+  session = {
+    subtopic: currentSubtopic,
+    index:    0,
+    finished: false,
+    items: Array.from({ length: SESSION_LENGTH }, () => ({
+      problem:   generateProblem(currentSubtopic),
+      solved:    false,
+      hadHelp:   false,
+      input:     '',
+      wrong:     false,
+      stepsOpen: false,
+    })),
+  };
+  showProblem();
+}
+
+/** Move to problem i (0-based), remembering what was typed in the current one */
+function goTo(i) {
+  if (i < 0 || i >= SESSION_LENGTH || i === session.index) return;
+  currentItem().input = answerInput.value;
+  session.index = i;
+  showProblem();
 }
 
 function renderProgress() {
-  const done    = sessionResults.length;
-  const solved  = sessionResults.filter(r => r !== 'skipped').length;
+  const solved = session.items.filter(it => it.solved).length;
 
-  progressCount.textContent = done >= SESSION_LENGTH
-    ? TEXTS.progress.done(SESSION_LENGTH)
-    : TEXTS.progress.current(done + 1, SESSION_LENGTH);
+  progressCount.textContent = TEXTS.progress.current(session.index + 1, SESSION_LENGTH);
   progressScore.textContent = TEXTS.progress.score(solved);
 
   progressTrack.innerHTML = '';
-  for (let i = 0; i < SESSION_LENGTH; i++) {
-    const seg = document.createElement('div');
+  session.items.forEach((item, i) => {
+    const seg = document.createElement('button');
+    seg.type      = 'button';
     seg.className = 'progress-seg';
-    if (i < done) seg.classList.add(sessionResults[i] === 'skipped' ? 'skipped' : 'correct');
-    else if (i === done) seg.classList.add('current');
+    if (item.solved)         seg.classList.add('correct');
+    if (i === session.index) seg.classList.add('current');
+    seg.setAttribute('aria-label', TEXTS.progress.goTo(i + 1));
+    if (i === session.index) seg.setAttribute('aria-current', 'true');
+    seg.addEventListener('click', () => goTo(i));
     progressTrack.appendChild(seg);
-  }
+  });
 }
 
-function finishSession() {
-  const solved  = sessionResults.filter(r => r !== 'skipped').length;
-  const correct = sessionResults.filter(r => r === 'first').length;
+function renderSessionComplete() {
+  const solved  = session.items.filter(it => it.solved).length;
+  const correct = session.items.filter(it => it.solved && !it.hadHelp).length;
   const passed  = correct >= PASS_THRESHOLD;
   const next    = getNextLevel();
 
@@ -174,44 +210,66 @@ function finishSession() {
   btnNextLevel.className = 'btn ' + (passed ? 'btn-primary' : 'btn-secondary');
   btnRepeat.className    = 'btn ' + (passed ? 'btn-secondary' : 'btn-primary');
 
-  // lock input (the last problem may have been skipped, not solved)
-  answered = true;
-  btnCheck.disabled    = true;
-  answerInput.disabled = true;
-
-  btnNext.style.display = 'none';
   sessionComplete.style.display = 'block';
 }
 
+/** Show the end-of-set panel (all solved, or the user pressed "Finish set") */
+function finishSession() {
+  session.finished = true;
+  renderSessionComplete();
+  updateNav();
+  sessionComplete.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/** Prev / Next buttons depend on the position in the set */
+function updateNav() {
+  const last = session.index === SESSION_LENGTH - 1;
+  btnPrev.disabled      = session.index === 0;
+  btnNext.textContent   = last ? TEXTS.session.finish : TEXTS.session.nextProblem;
+  // once the set is finished there is nothing left to do from the last problem
+  btnNext.style.display = last && session.finished ? 'none' : '';
+}
+
 // ─── problem lifecycle ────────────────────────────────────────────────────────
-function loadNewProblem() {
-  currentProblem = generateProblem(currentSubtopic);
-  if (!currentProblem) return;
+/** Draw the current problem with everything the user has already done on it */
+function showProblem() {
+  const item = currentItem();
+  if (!item.problem) return;
 
-  answered = false;
-  hadHelp  = false;
+  renderLatexInto(problemEquation, item.problem.latex);
 
-  // render equation
-  renderLatexInto(problemEquation, currentProblem.latex);
-
-  // reset UI
-  answerInput.value = '';
+  // answer area
+  answerInput.value    = item.input;
+  answerInput.readOnly = item.solved;   // readOnly (not disabled) so Enter still moves on
+  btnCheck.disabled    = item.solved;
   answerInput.classList.remove('correct', 'incorrect');
-  answerInput.disabled = false;
-  feedback.textContent = '';
   feedback.className   = 'feedback';
-  stepsBox.style.display = 'none';
-  stepsList.innerHTML    = '';
-  btnSteps.textContent   = TEXTS.steps.show;
-  btnCheck.disabled = false;
+  feedback.textContent = '';
+  if (item.solved) {
+    answerInput.classList.add('correct');
+    feedback.textContent = TEXTS.feedback.correct;
+    feedback.className   = 'feedback correct';
+  } else if (item.wrong) {
+    answerInput.classList.add('incorrect');
+    feedback.textContent = TEXTS.feedback.wrong;
+    feedback.className   = 'feedback incorrect';
+  }
+
+  // solution
+  applySteps();
+
+  // end-of-set panel stays visible once the set is finished
+  sessionComplete.style.display = session.finished ? 'block' : 'none';
 
   renderProgress();
+  updateNav();
   answerInput.focus();
 }
 
 // ─── answer checking ──────────────────────────────────────────────────────────
 function checkAnswer() {
-  if (answered) return;
+  const item = currentItem();
+  if (item.solved) return;
 
   const raw   = answerInput.value.trim().replace(',', '.');
   const value = parseFloat(raw);
@@ -222,12 +280,15 @@ function checkAnswer() {
     return;
   }
 
+  item.input = answerInput.value;
+
   // compare with small epsilon for floats (answers here are always integers)
-  const correct = Math.abs(value - currentProblem.answer) < 1e-9;
+  const correct = Math.abs(value - item.problem.answer) < 1e-9;
 
   if (!correct) {
     // let the user fix it; the answer stays hidden (it's in the step-by-step solution)
-    hadHelp = true;
+    item.hadHelp = true;
+    item.wrong   = true;
     answerInput.classList.add('incorrect');
     feedback.textContent = TEXTS.feedback.wrong;
     feedback.className   = 'feedback incorrect';
@@ -235,47 +296,38 @@ function checkAnswer() {
     return;
   }
 
-  answered = true;
-  btnCheck.disabled = true;
-  answerInput.classList.remove('incorrect');
-  answerInput.classList.add('correct');
-  feedback.textContent = TEXTS.feedback.correct;
-  feedback.className   = 'feedback correct';
+  item.solved = true;
+  item.wrong  = false;
+  showProblem();
 
-  recordResult(hadHelp ? 'retry' : 'first');
-}
-
-/** "Next problem" button: an unsolved problem counts as skipped */
-function nextProblem() {
-  if (!answered) {
-    recordResult('skipped');
-    if (sessionResults.length >= SESSION_LENGTH) return;
-  }
-  loadNewProblem();
-}
-
-function recordResult(result) {
-  sessionResults.push(result);
-  renderProgress();
-  if (sessionResults.length >= SESSION_LENGTH) finishSession();
+  if (session.items.every(it => it.solved)) finishSession();
 }
 
 // ─── step-by-step ─────────────────────────────────────────────────────────────
 function toggleSteps() {
-  if (stepsBox.style.display === 'none') {
-    if (!answered) hadHelp = true;
-    renderSteps();
+  const item = currentItem();
+  item.stepsOpen = !item.stepsOpen;
+  if (item.stepsOpen && !item.solved) item.hadHelp = true;
+  applySteps();
+}
+
+/** Show or hide the solution according to the current item's state */
+function applySteps() {
+  const item = currentItem();
+  if (item.stepsOpen) {
+    renderSteps(item.problem);
     stepsBox.style.display = 'block';
     btnSteps.textContent   = TEXTS.steps.hide;
   } else {
     stepsBox.style.display = 'none';
+    stepsList.innerHTML    = '';
     btnSteps.textContent   = TEXTS.steps.show;
   }
 }
 
-function renderSteps() {
+function renderSteps(problem) {
   stepsList.innerHTML = '';
-  currentProblem.steps.forEach(step => {
+  problem.steps.forEach(step => {
     const li = document.createElement('li');
 
     const content = document.createElement('div');
@@ -320,24 +372,30 @@ views.equations.querySelectorAll('.subtopic-card:not(.disabled)').forEach(card =
 
 // Practice buttons
 btnCheck.addEventListener('click', checkAnswer);
-btnNext.addEventListener('click',  nextProblem);
+btnPrev.addEventListener('click',  () => goTo(session.index - 1));
+btnNext.addEventListener('click',  () => {
+  if (session.index < SESSION_LENGTH - 1) goTo(session.index + 1);
+  else finishSession();
+});
 btnSteps.addEventListener('click', toggleSteps);
 btnRepeat.addEventListener('click', startSession);
 
-// Clear the red "wrong" state as soon as the user edits the answer
+// Remember the input and clear the "wrong" state as soon as the user edits the answer
 answerInput.addEventListener('input', () => {
-  if (answered) return;
+  const item = currentItem();
+  if (item.solved) return;
+  item.input = answerInput.value;
+  item.wrong = false;
   answerInput.classList.remove('incorrect');
   feedback.textContent = '';
   feedback.className   = 'feedback';
 });
 
-// Allow Enter key to check answer
+// Enter: check the answer, or go on to the next problem once solved
 answerInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    if (!answered) checkAnswer();
-    else if (sessionResults.length < SESSION_LENGTH) loadNewProblem();
-  }
+  if (e.key !== 'Enter') return;
+  if (!currentItem().solved) checkAnswer();
+  else if (session.index < SESSION_LENGTH - 1) goTo(session.index + 1);
 });
 
 // ─── init ─────────────────────────────────────────────────────────────────────

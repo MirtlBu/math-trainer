@@ -21,6 +21,13 @@ function randNZ(range) {
   return n;
 }
 
+/** Random coefficient in [-range, range] with |n| >= 2 (so 1x / -x never appear) */
+function randCoef(range) {
+  let n;
+  do { n = randInt(-range, range); } while (Math.abs(n) < 2);
+  return n;
+}
+
 /** Format a number as a signed string for display, e.g. +3, -5 */
 function signed(n) {
   return n >= 0 ? `+${n}` : `${n}`;
@@ -78,7 +85,7 @@ function latexFrac(num, den) {
  *   a * x = b   (multiplication, integer answer)
  */
 function generateLinearBasic() {
-  const type = randInt(1, 2);
+  const type = randInt(1, 3);
 
   if (type === 1) {
     // x + a = b  →  x = b - a
@@ -109,10 +116,10 @@ function generateLinearBasic() {
         }
       ]
     };
-  } else {
+  } else if (type === 2) {
     // a * x = b  →  x = b/a  (keep answer integer)
     const x = randNZ(10);
-    const a = randNZ(8);
+    const a = randCoef(8);
     const b = a * x;
 
     const lhs = coefX(a);
@@ -136,6 +143,33 @@ function generateLinearBasic() {
         }
       ]
     };
+  } else {
+    // x / a = b  →  x = a * b  (answer is always an integer)
+    const a = randCoef(8);
+    const b = randCoef(6);
+    const x = a * b;
+
+    const aStr = a > 0 ? `${a}` : `(${a})`;   // brackets around negatives in the steps
+    const latex = `\\dfrac{x}{${a}} = ${b}`;
+
+    return {
+      latex,
+      answer: x,
+      steps: [
+        {
+          explanation: TEXTS.solution.original,
+          math: latex
+        },
+        {
+          explanation: TEXTS.solution.multiply(a),
+          math: `${aStr} \\cdot \\dfrac{x}{${a}} = ${aStr} \\cdot ${b < 0 ? `(${b})` : b}`
+        },
+        {
+          explanation: TEXTS.solution.simplify,
+          math: `x = ${x}`
+        }
+      ]
+    };
   }
 }
 
@@ -147,7 +181,7 @@ function generateLinearBasic() {
  */
 function generateLinearTwoStep() {
   const x = randNZ(10);
-  const a = randNZ(8);
+  const a = randCoef(8);
   const b = randNZ(10);
   const c = a * x + b;
 
@@ -190,13 +224,16 @@ function generateLinearTwoStep() {
  */
 function generateLinearBothSides() {
   const x  = randNZ(10);
-  const c  = randNZ(6);
+  const c  = randCoef(6);
   const b  = randNZ(10);
   const d  = randNZ(10);
   // a*x + b = c*x + d  →  a = c + (d-b)/x   pick a such that it's integer
   // Easier: choose a = c + k where k ≠ 0, then d = b + k*x
-  const k = randNZ(5);
-  const a = c + k;
+  let k, a;
+  do {
+    k = randCoef(5);
+    a = c + k;
+  } while (Math.abs(a) < 2);   // no 0x / x / -x on the left either
   const dActual = b + k * x;   // overwrite d
 
   const lhsA = coefX(a);

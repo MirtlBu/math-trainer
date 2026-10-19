@@ -9,34 +9,36 @@ const TEXTS = {
 
   // ─── breadcrumb ─────────────────────────────────────────────────────────────
   nav: {
-    home:      'Home',
+    home: 'Home',
     equations: 'Equations',
   },
 
   // ─── answer checking ────────────────────────────────────────────────────────
   feedback: {
     notANumber: 'Please enter a number.',
-    wrong:      'Not quite, try again.',
-    correct:    'Correct!',
+    wrong: 'Not quite, try again.',
+    correct: 'Correct!',
   },
 
   // ─── step-by-step button ────────────────────────────────────────────────────
   steps: {
-    show: 'Show step-by-step solution',
+    show: 'Step-by-step solution',
     hide: 'Hide solution',
   },
 
   // ─── progress bar ───────────────────────────────────────────────────────────
   progress: {
-    current: (n, total)  => `Problem ${n} of ${total}`,
-    done:    (total)     => `${total} of ${total} done`,
-    score:   (solved)    => `${solved} solved`,
+    current: (n, total) => `Problem ${n} of ${total}`,
+    goTo: (n) => `Go to problem ${n}`,
+    score: (solved) => `${solved} solved`,
   },
 
   // ─── end of set ─────────────────────────────────────────────────────────────
   session: {
-    summary:   (solved, total, firstTry) => `You solved ${solved} of ${total}, ${firstTry} on the first try.`,
-    passed:    'Nice work!',
+    summary: (solved, total, firstTry) => `You solved ${solved} of ${total}.`,
+    nextProblem: 'Next problem',
+    finish: 'Finish set',
+    passed: 'Nice work!',
     notPassed: 'Another set at this level might help.',
     nextLevel: (label) => `Next level: ${label}`,
     backToTopics: 'Back to topics',
@@ -44,15 +46,16 @@ const TEXTS = {
 
   // ─── solution steps (equations.js) ──────────────────────────────────────────
   solution: {
-    original:     'Write the original equation.',
-    simplify:     'Simplify.',
+    original: 'Write the original equation.',
+    simplify: 'Simplify.',
     // n is the number being added/subtracted; always positive here
-    subtract:     (n) => `Subtract ${n} from both sides.`,
-    add:          (n) => `Add ${n} to both sides.`,
+    subtract: (n) => `Subtract ${n} from both sides.`,
+    add: (n) => `Add ${n} to both sides.`,
     subtractIsolate: (n) => `Subtract ${n} from both sides to isolate $x$.`,
-    addIsolate:      (n) => `Add ${n} to both sides to isolate $x$.`,
+    addIsolate: (n) => `Add ${n} to both sides to isolate $x$.`,
+    multiply: (n) => `Multiply both sides by ${n < 0 ? `(${n})` : n}.`,
     // negative divisors are shown in brackets: "Divide both sides by (-3)."
-    divide:       (n) => `Divide both sides by ${n < 0 ? `(${n})` : n}.`,
+    divide: (n) => `Divide both sides by ${n < 0 ? `(${n})` : n}.`,
     // term is LaTeX, e.g. "2x" or "-x"
     moveVariable: (term) => `Subtract $${term}$ from both sides to move variable terms to the left.`,
   },

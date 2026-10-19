@@ -17,15 +17,18 @@
   --clr-text: #1d2433;
   --clr-muted: #6b7280;
   --clr-success: #16a34a;
-  --clr-retry:      #f59e0b;   /* wrong answer / solved with retries */
-  --clr-retry-bg:   #fffbeb;
-  --clr-retry-text: #b45309;
+  --clr-retry: #f59e0b;
+  /* wrong answer / solved with retries */
+  --clr-retry-bg: #fffbeb;
+  --clr-retry-text: #f59e0b;
   --clr-easy: #dcfce7;
   --clr-easy-text: #166534;
-  --clr-med: #fef9c3;
-  --clr-med-text: #854d0e;
+  --clr-med: #fffbeb;
+  --clr-med-text: #f59e0b;
   --clr-hard: #fee2e2;
   --clr-hard-text: #991b1b;
+  --fs-control: 1rem;
+  /* one size for inputs, buttons and feedback */
   --radius: 12px;
   --shadow: 0 1px 4px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .06);
   --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -61,6 +64,8 @@
 }
 
 .math-trainer p {
+  font-size: 1rem;
+  /* one size for every paragraph */
   line-height: 1.5;
 }
 
@@ -98,8 +103,8 @@
 }
 
 .math-trainer .logo {
-  font-weight: 700;
-  font-size: 1.1rem;
+  font-weight: 600;
+  font-size: 1.2rem;
   color: var(--clr-primary);
   white-space: nowrap;
 }
@@ -108,7 +113,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--clr-muted);
 }
 
@@ -123,14 +128,12 @@
 
 .math-trainer .breadcrumb-item.active {
   color: var(--clr-text);
-  font-weight: 500;
   cursor: default;
   text-decoration: none;
 }
 
 .math-trainer .breadcrumb-sep {
   user-select: none;
-  color: var(--clr-border);
 }
 
 /* ============================================================
@@ -156,14 +159,13 @@
 
 .math-trainer .hero h1 {
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 8px;
   text-align: center;
 }
 
 .math-trainer .hero p {
   color: var(--clr-muted);
-  font-size: 1rem;
   text-align: center;
 }
 
@@ -205,13 +207,12 @@
 }
 
 .math-trainer .topic-card h2 {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 600;
   margin-bottom: 6px;
 }
 
 .math-trainer .topic-card p {
-  font-size: 0.85rem;
   color: var(--clr-muted);
 }
 
@@ -262,7 +263,7 @@
 }
 
 .math-trainer .difficulty {
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   padding: 2px 10px;
   border-radius: 20px;
@@ -292,7 +293,6 @@
 }
 
 .math-trainer .subtopic-card p {
-  font-size: 0.875rem;
   color: var(--clr-muted);
 }
 
@@ -300,7 +300,23 @@
    Practice view
    ============================================================ */
 .math-trainer .practice-container {
-  max-width: 600px;
+  max-width: 100%;
+}
+
+/* two equal columns: problem on the left, solution on the right */
+.math-trainer .practice-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.math-trainer .practice-col {
+  min-width: 0;
+}
+
+.math-trainer .practice-col .btn-ghost {
+  width: 100%;
 }
 
 /* Session progress */
@@ -322,6 +338,10 @@
 }
 
 .math-trainer .progress-seg {
+  position: relative;
+  padding: 0;
+  border: none;
+  cursor: pointer;
   flex: 1;
   height: 8px;
   border-radius: 4px;
@@ -329,30 +349,36 @@
   transition: background .2s;
 }
 
-.math-trainer .progress-seg.current {
-  background: #bfdbfe;
+.math-trainer .progress-seg:hover {
+  opacity: 0.75;
+}
+
+/* larger invisible click area (the visible bar is only 8px high) */
+.math-trainer .progress-seg::after {
+  content: '';
+  position: absolute;
+  inset: -8px -2px;
 }
 
 .math-trainer .progress-seg.correct {
   background: var(--clr-success);
 }
 
-.math-trainer .progress-seg.skipped {
-  background: var(--clr-border);
+/* the problem being viewed: ring around the segment, whatever its colour */
+.math-trainer .progress-seg.current {
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 2px;
 }
 
 /* Set complete panel */
 .math-trainer .session-complete {
   margin-top: 28px;
-  background: var(--clr-surface);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius);
-  padding: 24px 28px;
+  padding: 24px 0;
 }
 
 .math-trainer .session-complete h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   margin-bottom: 6px;
 }
 
@@ -376,11 +402,10 @@
 }
 
 .math-trainer .problem-label {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--clr-muted);
-  margin-bottom: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--clr-text);
 }
 
 .math-trainer .problem-equation {
@@ -413,7 +438,7 @@
   padding: 0 14px;
   border: 2px solid var(--clr-border);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--fs-control);
   font-family: var(--font);
   color: var(--clr-text);
   background: var(--clr-surface);
@@ -438,7 +463,7 @@
 /* Feedback */
 .math-trainer .feedback {
   margin-top: 12px;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 500;
   min-height: 24px;
 }
@@ -459,7 +484,7 @@
   padding: 0 20px;
   border: none;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-family: var(--font);
   font-weight: 600;
   cursor: pointer;
@@ -512,9 +537,9 @@
    Step-by-step solution box
    ============================================================ */
 .math-trainer .steps-box {
-  margin-top: 32px;
-  background: #f0f7ff;
-  border: 1px solid #bfdbfe;
+  margin-top: 16px;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
   border-radius: var(--radius);
   padding: 28px 32px;
 }
@@ -523,7 +548,7 @@
   font-size: 1rem;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #1e40af;
+  color: var(--clr-text);
 }
 
 .math-trainer .steps-list {
@@ -565,7 +590,7 @@
 }
 
 .math-trainer .step-explanation {
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--clr-muted);
 }
 
@@ -576,6 +601,17 @@
 /* ============================================================
    Responsive
    ============================================================ */
+@media (max-width: 720px) {
+  .math-trainer .practice-columns {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .math-trainer .practice-col+.practice-col {
+    margin-top: 4px;
+  }
+}
+
 @media (max-width: 480px) {
   .math-trainer .view {
     padding: 24px 16px 60px;
