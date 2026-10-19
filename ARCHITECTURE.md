@@ -19,9 +19,10 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/polynomial-equations.js` | Quadratic / cubic / quartic: shared **builders** plus the equation generators. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
 | `js/ui.js` | Everything that touches the page: routing, session, checking, rendering. |
+| `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → equations → expressions → polynomial-equations → inequalities → ui`.
+`texts → polynomial → intervals → numbers → equations → expressions → polynomial-equations → inequalities → ui → embed`.
 `expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`.
 
 ## Content model
@@ -117,6 +118,15 @@ Keyboard: Enter in a field moves to the next field, in the last field it checks,
 ### KaTeX
 
 Loaded with `defer` from the CDN. `renderLatexInto` / `renderInline` / `renderKatex` retry for a short time if KaTeX is not ready yet. `index.html` also runs auto-render once on load for the static card texts (`$…$`).
+
+## Embedding options (URL parameters)
+
+The app is meant to run inside an iframe on the WordPress site (GitHub Pages URL in `src`). `js/embed.js` reads parameters from the URL; with none, nothing changes.
+
+- `?bg=transparent`: page background transparent so the host page shows through.
+- `?bg=%23fff8f0` (or `?bg=fff8f0`, or a colour name): any other background colour. Invalid values are ignored.
+
+Implementation: it sets the CSS variable `--page-bg` on `<html>`; `body` (inline style in `index.html`) and `.math-trainer` (`style.css`) use `var(--page-bg, <default>)`. Only the page background is affected (cards stay white).
 
 ## Texts
 

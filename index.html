@@ -10,7 +10,7 @@
   <style>
     body {
       margin: 0;
-      background: #f7f8fc;
+      background: var(--page-bg, #f7f8fc);   /* --page-bg can be set with ?bg=... (see js/embed.js) */
       min-height: 100vh;
     }
   </style>
@@ -330,6 +330,7 @@
   <script src="js/polynomial-equations.js"></script>
   <script src="js/inequalities.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/embed.js"></script>
 </body>
 
 </html>

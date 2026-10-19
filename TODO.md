@@ -28,7 +28,8 @@ _Done 2026-10-19: numeric fields now use a text keyboard (phones had no minus or
 
 - [ ] Remove `renderMathInElement(document.body …)` from the `onload` in `index.html` (it would process `$…$` anywhere on the host page); render only inside `#math-trainer`.
 - [ ] Global JS: everything is a global function/const; wrap in an IIFE or namespace so names cannot clash with the theme's scripts. The element ids are global too (`view-home`, `btn-check`, …), so two trainers cannot live on one page.
-- [ ] Decide how to include it: Elementor HTML widget with the files hosted on GitHub Pages / the WP media library, or an `<iframe>`. Check CSS inheritance inside the theme (fonts, button styles, line heights).
+- [x] First version: GitHub Pages + `<iframe>` in an Elementor HTML widget; page background set per embed with `?bg=` (see ARCHITECTURE.md). Direct (non-iframe) embedding is still open.
+- [ ] Direct embedding instead of the iframe: Elementor HTML widget with the files hosted on GitHub Pages / the WP media library. Check CSS inheritance inside the theme (fonts, button styles, line heights).
 - [ ] Load KaTeX once, and only on pages that use the trainer.
 - [ ] Publish: push to GitHub (see README), maybe GitHub Pages for a live demo.
 

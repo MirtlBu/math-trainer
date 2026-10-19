@@ -36,7 +36,7 @@
   font-family: var(--font);
   font-size: 16px;
   line-height: 1.5;
-  background: var(--clr-bg);
+  background: var(--page-bg, var(--clr-bg));   /* --page-bg: optional override, see js/embed.js */
   color: var(--clr-text);
   text-align: left;
 }
