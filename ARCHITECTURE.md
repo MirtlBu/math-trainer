@@ -139,6 +139,7 @@ Scripts never hard-code user-facing strings; they use `TEXTS.*` from `js/texts.j
 
 - Everything is under `.math-trainer` (reset, tokens, components). Colour/size tokens are CSS variables on `.math-trainer` (`--clr-*`, `--fs-control`, `--radius`, …).
 - One font size for controls (`--fs-control`: inputs, buttons, feedback) and one for paragraphs (`p`, 1rem); formulas also 1rem (`.math-trainer .katex`).
+- Font: Open Sans, self-hosted in `fonts/` (variable woff2, subsets latin, latin-ext and math for √ ± ≥); `@font-face` rules at the top of `style.css`, `--font` token on `.math-trainer`. For other scripts (e.g. Cyrillic) add the matching subset. See `fonts/README.md`.
 - Amber (`--clr-retry`) = "not right yet" (instead of red); green = solved/completed.
 - Breakpoints: 720 px (columns stack) and 480 px (tighter paddings, full-width inputs).
 
