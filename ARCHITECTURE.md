@@ -14,15 +14,17 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/polynomial.js` | Parse/compare/print polynomials in x (`parsePolynomial`, `polyEquals`, `polyToLatex`, `termsLatex`). |
 | `js/intervals.js` | Parse/compare/print intervals for inequality answers (`parseInterval`, `unmatchedIntervals`, `intervalsToLatex`). |
 | `js/numbers.js` | Parse numbers (`3`, `-2.5`, `3/2`) and compare sets of numbers (`parseNumber`, `unmatchedNumbers`). |
+| `js/radicals.js` | Square-root expressions: value = `{radicand: coef}` (key 1 = plain number); parse typed answers (`parseRadicals`), arithmetic, LaTeX. |
 | `js/equations.js` | Random helpers (`randInt`, `randNZ`, `randCoef`, `coefX`, `latexFrac`), the three linear-equation generators, the `GENERATORS` registry and `generateProblem(key)`. |
 | `js/expressions.js` | "Expand and simplify" generators. |
 | `js/polynomial-equations.js` | Quadratic / cubic / quartic: shared **builders** plus the equation generators. |
+| `js/radical-problems.js` | Generators for the square-root levels. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
 | `js/ui.js` | Everything that touches the page: routing, session, checking, rendering. |
 | `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → equations → expressions → polynomial-equations → inequalities → ui → embed`.
+`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → inequalities → ui → embed`.
 `expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`.
 
 ## Content model
@@ -32,7 +34,7 @@ Levels live in **topics** (`equations`, `expressions`, `inequalities`). Each top
 | Topic | Level keys |
 |---|---|
 | equations | `linear-basic`, `linear-twoStep`, `linear-bothSides`, `quad-factored`, `quad-incomplete`, `quad-general`, `cubic`, `quartic` |
-| expressions | `expand-number`, `expand-monomial`, `expand-binomials` |
+| expressions | `expand-number`, `expand-monomial`, `expand-binomials`, `radical-simplify`, `radical-addsub`, `radical-muldiv`, `radical-expand`, `radical-rationalize` |
 | inequalities | `ineq-linear`, `ineq-product`, `ineq-quadratic`, `ineq-cubic`, `ineq-quartic` |
 
 Home also has disabled placeholders (Functions & Graphs, Geometry).
@@ -43,7 +45,7 @@ Home also has disabled placeholders (Functions & Graphs, Geometry).
 
 ```js
 {
-  kind:   'solve' | 'simplify' | 'numbers' | 'intervals',   // missing kind = 'solve'
+  kind:   'solve' | 'simplify' | 'radicals' | 'numbers' | 'intervals',   // missing kind = 'solve'
   latex:  'x^3 + 5x^2 + 6x > 0',      // shown in the problem box (KaTeX, display mode)
   answer: ...,                         // depends on kind, see below
   steps:  [{ explanation, math }],     // explanation: HTML text, may hold $inline math$; math: LaTeX
@@ -53,6 +55,7 @@ Home also has disabled placeholders (Functions & Graphs, Geometry).
 | kind | answer | fields on screen | accepted input |
 |---|---|---|---|
 | `solve` | one number | 1 (with "x =") | `5`, `-3`, `2.5`, `2,5`, `3/2` |
+| `radicals` | `{radicand: coef}` | 1 | `3√6 - 2`, `3*sqrt(6)`, `√6`; every root fully simplified (`√54` is rejected), each root and the plain numbers once |
 | `numbers` | array of numbers (a set of roots) | one per root (each with "x =") | same as above, any order |
 | `simplify` | polynomial `{degree: coef}` | 1 | `12x^2+2x-4`, `12x²+2x−4`, `2*x`; no brackets, each power once |
 | `intervals` | array of `{lo, loIncl, hi, hiIncl}` (±Infinity allowed) | one per interval | `x > 4`, `4 < x`, `-3 <= x < 2`, `(-3, 2]`, `(-inf, 1)`, `(0, ∞)`; also ≥ ≤ − |

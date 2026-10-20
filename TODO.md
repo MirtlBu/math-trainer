@@ -8,6 +8,7 @@ Rough priority order inside each section. Last review of the UI/UX logic: 2026-1
 - [ ] **Double (repeated) roots in inequalities**: `x²(x − 2) > 0`, `(x − 1)²(x + 3) ≤ 0`. The sign does not flip at an even-multiplicity root; non-strict signs can add an isolated point (`x = 1`).
 - [ ] **Cubics that need a root search**: `x³ − 6x² + 11x − 6 = 0`: try divisors of the constant term, divide by `(x − r)`, solve the quadratic. Equations and inequalities.
 - [ ] **Non-integer roots** outside the factored-form level (rational roots like `x = 3/2` in general-form quadratics, maybe `√`-roots).
+- [ ] **Roots, next steps:** answers with fractional coefficients (`√2/2`, `3√2/2`; today the parser accepts whole-number coefficients only, so rationalizing problems are generated only when the result is a whole-number combination), rationalizing with a coefficient in the denominator (`6/(2√3)`), cube and n-th roots, nested roots, equations with a root (`√(x + 2) = x`).
 - [ ] Remaining topics from the roadmap in README: functions & graphs, geometry. Equations/inequalities levels beyond the exam list if wanted (systems, absolute value, rational and irrational equations, logarithms, trigonometry).
 
 ## Found while reviewing the UI/UX (worth fixing)

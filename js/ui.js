@@ -313,9 +313,11 @@ function setupForKind(kind) {
     solve:     TEXTS.practice.solveLabel,
     numbers:   TEXTS.practice.solveLabel,
     simplify:  TEXTS.practice.simplifyLabel,
+    radicals:  TEXTS.practice.radicalLabel,
     intervals: TEXTS.practice.inequalityLabel,
   };
   const hints = {
+    radicals:  TEXTS.practice.radicalHint,
     numbers:   TEXTS.practice.numbersHint,
     intervals: TEXTS.practice.intervalHint,
   };
@@ -348,6 +350,7 @@ function buildInputs(kind, count) {
     solve:     TEXTS.practice.numberPlaceholder,
     numbers:   TEXTS.practice.numberPlaceholder,
     simplify:  TEXTS.practice.expressionPlaceholder,
+    radicals:  TEXTS.practice.radicalPlaceholder,
     intervals: TEXTS.practice.intervalPlaceholder,
   };
   const numeric = kind === 'solve' || kind === 'numbers';   // answers like "x = 5"
@@ -449,6 +452,14 @@ function judgeAnswer(rawInputs, problem) {
   }
 
   const rawInput = rawInputs[0];
+
+  if (problem.kind === 'radicals') {
+    const parsed = parseRadicals(rawInput);
+    if (parsed.error === 'notSimplified') return { status: 'hint', message: TEXTS.feedback.simplifyRoots };
+    if (parsed.error === 'combine')       return { status: 'hint', message: TEXTS.feedback.combineRoots };
+    if (parsed.error)                     return { status: 'hint', message: TEXTS.feedback.notARadical };
+    return radicalsEqual(parsed.terms, problem.answer) ? { status: 'correct' } : { status: 'wrong', bad: [0] };
+  }
 
   if (problem.kind === 'simplify') {
     const parsed = parsePolynomial(rawInput);
