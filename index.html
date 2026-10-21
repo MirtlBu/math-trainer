@@ -65,10 +65,10 @@
           <p>From linear to quartic</p>
         </div>
 
-        <div class="topic-card disabled">
+        <div class="topic-card" data-topic="graphs">
           <div class="topic-icon">&#x192;</div>
           <h2>Functions &amp; Graphs</h2>
-          <p>Coming soon</p>
+          <p>Reading and interpreting graphs</p>
         </div>
 
         <div class="topic-card disabled">
@@ -284,6 +284,50 @@
       </section>
     </main>
 
+    <!-- FUNCTIONS & GRAPHS VIEW: subtopic list -->
+    <main id="view-graphs" class="view" data-topic="graphs">
+      <section class="subtopic-header">
+        <h1>Functions &amp; Graphs</h1>
+        <p>Choose a type to practice</p>
+      </section>
+
+      <section class="subtopic-list">
+
+        <div class="subtopic-card" data-subtopic="graph-value">
+          <div class="subtopic-meta">
+            <span class="difficulty easy">Beginner</span>
+          </div>
+          <h3>Linear Graphs — Reading Values</h3>
+          <p>Read the starting value, the rate or a point from the graph of a straight line</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="func-equation">
+          <div class="subtopic-meta">
+            <span class="difficulty easy">Beginner</span>
+          </div>
+          <h3>Linear Functions — Reading the Equation</h3>
+          <p>Stories with an equation like $S = 5w + 45$: rate of change, starting value, what each number means</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="func-compare">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Linear Functions — Comparing Two</h3>
+          <p>Two equations like $D = 6t + 10$ and $E = 3t + 20$: when are they equal, who is ahead, how fast does each grow</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="graph-interpret">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Linear Graphs — Interpreting the Story</h3>
+          <p>Choose the statement that matches the graph</p>
+        </div>
+
+      </section>
+    </main>
+
     <!-- PRACTICE VIEW: the actual exercise -->
     <main id="view-practice" class="view">
 
@@ -305,14 +349,18 @@
 
             <!-- problem display -->
             <div class="problem-box">
+              <!-- story / context for word problems; hidden when empty -->
+              <div class="problem-text" id="problem-text" style="display:none;"></div>
               <div class="problem-label" id="problem-label"><!-- filled by JS --></div>
               <div class="problem-equation" id="problem-equation"><!-- filled by JS --></div>
+              <!-- interactive graph for graph problems -->
+              <div class="problem-graph" id="problem-graph" style="display:none;"></div>
             </div>
 
             <!-- answer input -->
             <div class="answer-area">
-              <div class="answer-row">
-                <!-- one input per expected answer, created by JS -->
+              <div class="answer-row" id="answer-row">
+                <!-- one input per expected answer (or the answer options), created by JS -->
                 <div class="answer-inputs" id="answer-inputs"></div>
                 <button class="btn btn-primary" id="btn-check">Check</button>
               </div>
@@ -370,6 +418,10 @@
   <script src="js/expressions.js"></script>
   <script src="js/polynomial-equations.js"></script>
   <script src="js/radical-problems.js"></script>
+  <script src="js/graph.js"></script>
+  <script src="js/graph-stories.js"></script>
+  <script src="js/graph-problems.js"></script>
+  <script src="js/compare-problems.js"></script>
   <script src="js/inequalities.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/embed.js"></script>

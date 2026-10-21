@@ -87,12 +87,16 @@ const views = {
   equations: document.getElementById('view-equations'),
   expressions: document.getElementById('view-expressions'),
   inequalities: document.getElementById('view-inequalities'),
+  graphs:    document.getElementById('view-graphs'),
   practice:  document.getElementById('view-practice'),
 };
 
 const breadcrumb      = document.getElementById('breadcrumb');
-const TOPICS          = ['equations', 'expressions', 'inequalities'];   // views that list subtopic cards
+const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs'];   // views that list subtopic cards
 
+const problemText     = document.getElementById('problem-text');
+const problemGraph    = document.getElementById('problem-graph');
+const answerRow       = document.getElementById('answer-row');
 const problemLabel    = document.getElementById('problem-label');
 const problemEquation = document.getElementById('problem-equation');
 const answerInputs    = document.getElementById('answer-inputs');   // holds one input per expected answer
@@ -238,7 +242,7 @@ function startSession() {
 /** Move to problem i (0-based), remembering what was typed in the current one */
 function goTo(i) {
   if (i < 0 || i >= SESSION_LENGTH || i === session.index) return;
-  currentItem().inputs = inputEls().map(el => el.value);
+  currentItem().inputs = readInputs();
   session.index = i;
   showProblem();
 }
@@ -304,26 +308,16 @@ function updateNav() {
 }
 
 // ─── problem lifecycle ────────────────────────────────────────────────────────
-/** Label, "x =" prefix and hint depend on the answer type */
+/** The hint under the answer fields depends on the answer type */
 function setupForKind(kind) {
   if (kind === shownKind) return;
   shownKind = kind;
 
-  const labels = {
-    solve:     TEXTS.practice.solveLabel,
-    numbers:   TEXTS.practice.solveLabel,
-    simplify:  TEXTS.practice.simplifyLabel,
-    radicals:  TEXTS.practice.radicalLabel,
-    intervals: TEXTS.practice.inequalityLabel,
-  };
   const hints = {
     radicals:  TEXTS.practice.radicalHint,
     numbers:   TEXTS.practice.numbersHint,
     intervals: TEXTS.practice.intervalHint,
   };
-  problemLabel.textContent = labels[kind];
-  renderKatex(problemLabel);
-
   answerHint.textContent   = hints[kind] || '';
   answerHint.style.display = hints[kind] ? '' : 'none';
 }
@@ -351,6 +345,7 @@ function buildInputs(kind, count) {
     numbers:   TEXTS.practice.numberPlaceholder,
     simplify:  TEXTS.practice.expressionPlaceholder,
     radicals:  TEXTS.practice.radicalPlaceholder,
+    value:     TEXTS.practice.numberPlaceholder,
     intervals: TEXTS.practice.intervalPlaceholder,
   };
   const numeric = kind === 'solve' || kind === 'numbers';   // answers like "x = 5"
@@ -381,24 +376,109 @@ function buildInputs(kind, count) {
   }
 }
 
+/** Default label above the formula for problems that have no question of their own */
+const DEFAULT_LABELS = {
+  solve:     TEXTS.practice.solveLabel,
+  numbers:   TEXTS.practice.solveLabel,
+  simplify:  TEXTS.practice.simplifyLabel,
+  radicals:  TEXTS.practice.radicalLabel,
+  intervals: TEXTS.practice.inequalityLabel,
+  value:     TEXTS.practice.valueLabel,
+  choice:    TEXTS.practice.whichTrue,
+};
+
+/** Multiple choice: one radio button per option (options may contain $…$) */
+function buildChoices(problem) {
+  inputsBuiltFor = null;
+  answerInputs.innerHTML = '';
+
+  const list = document.createElement('div');
+  list.className = 'choice-list';
+  list.setAttribute('role', 'radiogroup');
+
+  problem.options.forEach((text, i) => {
+    const label = document.createElement('label');
+    label.className = 'choice';
+
+    const input = document.createElement('input');
+    input.type  = 'radio';
+    input.name  = 'choice';
+    input.value = String(i);
+
+    const span = document.createElement('span');
+    span.className = 'choice-text';
+    span.innerHTML = text;
+
+    label.appendChild(input);
+    label.appendChild(span);
+    list.appendChild(label);
+  });
+
+  answerInputs.appendChild(list);
+  renderKatex(list);
+}
+
+/** What the user has typed / chosen, one string per field (a single string for multiple choice) */
+function readInputs() {
+  if (currentItem().problem.kind === 'choice') {
+    const chosen = answerInputs.querySelector('input[type="radio"]:checked');
+    return [chosen ? chosen.value : ''];
+  }
+  return inputEls().map(el => el.value);
+}
+
+/** Put the item's state (typed text / chosen option, solved, wrong fields) onto the fields */
+function renderAnswerState(item) {
+  if (item.problem.kind === 'choice') {
+    answerInputs.querySelectorAll('input[type="radio"]').forEach((radio, i) => {
+      const label = radio.closest('label');
+      radio.checked  = item.inputs[0] === String(i);
+      radio.disabled = item.solved;
+      label.classList.remove('correct', 'incorrect');
+      if (item.solved && radio.checked)                       label.classList.add('correct');
+      else if (!item.solved && item.wrong && item.bad.includes(i)) label.classList.add('incorrect');
+    });
+    return;
+  }
+
+  inputEls().forEach((el, i) => {
+    el.value    = item.inputs[i] || '';
+    el.readOnly = item.solved;   // readOnly (not disabled) so Enter still moves on
+    el.classList.remove('correct', 'incorrect');
+    if (item.solved)                             el.classList.add('correct');
+    else if (item.wrong && item.bad.includes(i)) el.classList.add('incorrect');
+  });
+}
+
 /** Draw the current problem with everything the user has already done on it */
 function showProblem() {
   const item = currentItem();
   if (!item.problem) return;
 
-  renderLatexInto(problemEquation, item.problem.latex);
-  const kind = item.problem.kind || 'solve';
-  setupForKind(kind);
-  buildInputs(kind, answerCount(item.problem));
+  const problem = item.problem;
+  const kind = problem.kind || 'solve';
 
-  // answer area
-  inputEls().forEach((el, i) => {
-    el.value    = item.inputs[i] || '';
-    el.readOnly = item.solved;   // readOnly (not disabled) so Enter still moves on
-    el.classList.remove('correct', 'incorrect');
-    if (item.solved)                           el.classList.add('correct');
-    else if (item.wrong && item.bad.includes(i)) el.classList.add('incorrect');
-  });
+  // the problem box: optional story, the question / label, the formula, the graph
+  problemText.innerHTML     = problem.text || '';
+  problemText.style.display = problem.text ? '' : 'none';
+  if (problem.text) renderKatex(problemText);
+
+  problemLabel.textContent = problem.question || DEFAULT_LABELS[kind];
+  renderKatex(problemLabel);
+
+  problemEquation.style.display = problem.latex ? '' : 'none';
+  if (problem.latex) renderLatexInto(problemEquation, problem.latex);
+
+  problemGraph.style.display = problem.graph ? '' : 'none';
+  if (problem.graph) renderGraph(problemGraph, problem.graph);
+  else               problemGraph.innerHTML = '';
+
+  setupForKind(kind);
+  if (kind === 'choice') buildChoices(problem);
+  else                   buildInputs(kind, answerCount(problem));
+  answerRow.classList.toggle('choice', kind === 'choice');
+
+  renderAnswerState(item);
   btnCheck.disabled    = item.solved;
   feedback.className   = 'feedback';
   feedback.textContent = '';
@@ -418,7 +498,7 @@ function showProblem() {
 
   renderProgress();
   updateNav();
-  inputEls()[0].focus();
+  if (kind !== 'choice') inputEls()[0].focus();
 }
 
 // ─── answer checking ──────────────────────────────────────────────────────────
@@ -429,6 +509,12 @@ function showProblem() {
  *  bad  — for 'wrong': indexes of the fields that are wrong
  */
 function judgeAnswer(rawInputs, problem) {
+  if (problem.kind === 'choice') {
+    if (rawInputs[0] === '') return { status: 'hint', message: TEXTS.feedback.chooseOne };
+    const chosen = Number(rawInputs[0]);
+    return chosen === problem.answer ? { status: 'correct' } : { status: 'wrong', bad: [chosen] };
+  }
+
   if (problem.kind === 'intervals') {
     if (rawInputs.some(v => v.trim() === '')) {
       return { status: 'hint', message: rawInputs.length > 1 ? TEXTS.feedback.fillAll : TEXTS.feedback.notAnInterval };
@@ -480,7 +566,7 @@ function checkAnswer() {
   const item = currentItem();
   if (item.solved) return;
 
-  const values  = inputEls().map(el => el.value);
+  const values  = readInputs();
   const verdict = judgeAnswer(values, item.problem);
 
   if (verdict.status === 'hint') {
@@ -495,11 +581,10 @@ function checkAnswer() {
     // let the user fix it; the answer stays hidden (it's in the step-by-step solution)
     item.wrong   = true;
     item.bad     = verdict.bad;
-    const els = inputEls();
-    verdict.bad.forEach(i => els[i].classList.add('incorrect'));
+    renderAnswerState(item);
     feedback.textContent = TEXTS.feedback.wrong;
     feedback.className   = 'feedback incorrect';
-    els[verdict.bad[0]].select();
+    if (item.problem.kind !== 'choice') inputEls()[verdict.bad[0]].select();
     return;
   }
 
@@ -556,12 +641,14 @@ function renderSteps(problem) {
     explanation.className = 'step-explanation';
     explanation.innerHTML = step.explanation; // may contain inline $...$
 
-    const mathEl = document.createElement('div');
-    mathEl.className = 'step-math';
-    renderLatexInto(mathEl, step.math);
-
     content.appendChild(explanation);
-    content.appendChild(mathEl);
+
+    if (step.math) {   // some steps are text only
+      const mathEl = document.createElement('div');
+      mathEl.className = 'step-math';
+      renderLatexInto(mathEl, step.math);
+      content.appendChild(mathEl);
+    }
     li.appendChild(content);
     stepsList.appendChild(li);
   });
@@ -616,6 +703,17 @@ btnRepeat.addEventListener('click', startSession);
 answerInputs.addEventListener('input', e => {
   const item = currentItem();
   if (item.solved) return;
+
+  if (item.problem.kind === 'choice') {          // a different option was picked
+    item.inputs = [e.target.value];
+    item.bad    = [];
+    item.wrong  = false;
+    renderAnswerState(item);
+    feedback.textContent = '';
+    feedback.className   = 'feedback';
+    return;
+  }
+
   const i = inputEls().indexOf(e.target);
   item.inputs[i] = e.target.value;
   item.bad       = item.bad.filter(b => b !== i);
@@ -630,6 +728,11 @@ answerInputs.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
   const els = inputEls();
   const i   = els.indexOf(e.target);
+
+  if (currentItem().problem.kind === 'choice') {   // on a radio button: check the chosen option
+    if (!currentItem().solved) checkAnswer();
+    return;
+  }
 
   if (!currentItem().solved) {
     if (i < els.length - 1) els[i + 1].focus();

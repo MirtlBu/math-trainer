@@ -467,11 +467,143 @@
   margin-bottom: 28px;
 }
 
+.math-trainer .problem-text {
+  margin-bottom: 20px;
+}
+
+.math-trainer .problem-graph {
+  margin-top: 16px;
+}
+
 .math-trainer .problem-label {
   font-size: 1rem;
   font-weight: 700;
   margin-bottom: 20px;
   color: var(--clr-text);
+}
+
+/* ============================================================
+   Graphs
+   ============================================================ */
+.math-trainer .graph-svg {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  margin: 0 auto;
+  touch-action: pan-y;   /* vertical scrolling still works over the graph on phones */
+  overflow: visible;
+}
+
+.math-trainer .graph-grid      { stroke: var(--clr-border); stroke-width: 1; }
+.math-trainer .graph-tickmark  { stroke: var(--clr-text); stroke-width: 1.5; }
+.math-trainer .graph-axis      { stroke: var(--clr-text); stroke-width: 2; }
+.math-trainer .graph-arrow     { stroke: var(--clr-text); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.math-trainer .graph-line      { stroke: var(--clr-primary); stroke-width: 3; fill: none; stroke-linecap: round; }
+
+.math-trainer .graph-tick {
+  fill: var(--clr-muted);
+  font-size: 13px;
+  font-family: var(--font);
+}
+
+.math-trainer .graph-label {
+  fill: var(--clr-text);
+  font-size: 18px;
+  font-style: italic;
+  font-family: 'Times New Roman', Georgia, serif;
+}
+
+.math-trainer .graph-guide {
+  stroke: var(--clr-primary);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.math-trainer .graph-dot {
+  fill: var(--clr-primary);
+  stroke: var(--clr-surface);
+  stroke-width: 2;
+}
+
+.math-trainer .graph-tip {
+  fill: var(--clr-text);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  paint-order: stroke;
+  stroke: var(--clr-surface);
+  stroke-width: 4px;
+  pointer-events: none;
+}
+
+.math-trainer .graph-hit {
+  cursor: crosshair;
+}
+
+.math-trainer .graph-caption {
+  margin-top: 8px;
+  font-size: 0.875rem;
+  color: var(--clr-muted);
+  text-align: center;
+}
+
+/* ============================================================
+   Multiple choice
+   ============================================================ */
+.math-trainer .answer-row.choice {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.math-trainer .answer-row.choice .answer-inputs {
+  max-width: none;
+}
+
+.math-trainer .answer-row.choice #btn-check {
+  align-self: flex-start;
+}
+
+.math-trainer .choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.math-trainer .choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--clr-border);
+  border-radius: 8px;
+  background: var(--clr-surface);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+
+.math-trainer .choice:hover {
+  border-color: var(--clr-primary);
+}
+
+.math-trainer .choice input {
+  margin-top: 4px;
+  accent-color: var(--clr-primary);
+  flex-shrink: 0;
+}
+
+.math-trainer .choice.incorrect {
+  border-color: var(--clr-retry);
+  background: var(--clr-retry-bg);
+}
+
+.math-trainer .choice.correct {
+  border-color: var(--clr-success);
+  background: #f0fdf4;
+}
+
+.math-trainer .choice:has(input:disabled) {
+  cursor: default;
 }
 
 .math-trainer .problem-equation {

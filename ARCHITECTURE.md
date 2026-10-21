@@ -19,23 +19,28 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/expressions.js` | "Expand and simplify" generators. |
 | `js/polynomial-equations.js` | Quadratic / cubic / quartic: shared **builders** plus the equation generators. |
 | `js/radical-problems.js` | Generators for the square-root levels. |
+| `js/graph.js` | SVG function plotter with a hover/touch read-out (`renderGraph(container, spec)`). |
+| `js/graph-stories.js` | The stories (32) used by the graph / equation word problems: data only, one entry per story. |
+| `js/graph-problems.js` | Word-problem generators on a linear graph or equation, built from those stories. |
+| `js/compare-problems.js` | Two characters with two linear equations (`D = 6t + 10`, `E = 3t + 20`): own stories + the generator. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
 | `js/ui.js` | Everything that touches the page: routing, session, checking, rendering. |
 | `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → inequalities → ui → embed`.
+`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → inequalities → ui → embed`.
 `expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`.
 
 ## Content model
 
-Levels live in **topics** (`equations`, `expressions`, `inequalities`). Each topic has a view in `index.html` with `.subtopic-card` elements; the card's `data-subtopic` is the key into `GENERATORS`.
+Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`). Each topic has a view in `index.html` with `.subtopic-card` elements; the card's `data-subtopic` is the key into `GENERATORS`.
 
 | Topic | Level keys |
 |---|---|
 | equations | `linear-basic`, `linear-twoStep`, `linear-bothSides`, `quad-factored`, `quad-incomplete`, `quad-general`, `cubic`, `quartic` |
 | expressions | `expand-number`, `expand-monomial`, `expand-binomials`, `radical-simplify`, `radical-addsub`, `radical-muldiv`, `radical-expand`, `radical-rationalize` |
 | inequalities | `ineq-linear`, `ineq-product`, `ineq-quadratic`, `ineq-cubic`, `ineq-quartic` |
+| graphs | `graph-value`, `func-equation`, `func-compare`, `graph-interpret` |
 
 Home also has disabled placeholders (Functions & Graphs, Geometry).
 
@@ -45,7 +50,9 @@ Home also has disabled placeholders (Functions & Graphs, Geometry).
 
 ```js
 {
-  kind:   'solve' | 'simplify' | 'radicals' | 'numbers' | 'intervals',   // missing kind = 'solve'
+  kind:   'solve' | 'simplify' | 'radicals' | 'numbers' | 'intervals' | 'value' | 'choice',   // missing kind = 'solve'
+  // optional, for word / graph problems:
+  text, question, graph,              // story paragraph, the question (replaces the default label), graph spec
   latex:  'x^3 + 5x^2 + 6x > 0',      // shown in the problem box (KaTeX, display mode)
   answer: ...,                         // depends on kind, see below
   steps:  [{ explanation, math }],     // explanation: HTML text, may hold $inline math$; math: LaTeX
@@ -58,6 +65,8 @@ Home also has disabled placeholders (Functions & Graphs, Geometry).
 | `radicals` | `{radicand: coef}` | 1 | `3√6 - 2`, `3*sqrt(6)`, `√6`; every root fully simplified (`√54` is rejected), each root and the plain numbers once |
 | `numbers` | array of numbers (a set of roots) | one per root (each with "x =") | same as above, any order |
 | `simplify` | polynomial `{degree: coef}` | 1 | `12x^2+2x-4`, `12x²+2x−4`, `2*x`; no brackets, each power once |
+| `value` | one number | 1 (no "x =") | like `solve`; used for numbers read from a graph |
+| `choice` | index of the right option (`options: [text]`) | radio buttons | one option |
 | `intervals` | array of `{lo, loIncl, hi, hiIncl}` (±Infinity allowed) | one per interval | `x > 4`, `4 < x`, `-3 <= x < 2`, `(-3, 2]`, `(-inf, 1)`, `(0, ∞)`; also ≥ ≤ − |
 
 All fields use a plain text keyboard (`inputmode="text"`), because the numeric keypads on phones have no minus sign or "/".
@@ -121,6 +130,16 @@ Keyboard: Enter in a field moves to the next field, in the last field it checks,
 ### KaTeX
 
 Loaded with `defer` from the CDN. `renderLatexInto` / `renderInline` / `renderKatex` retry for a short time if KaTeX is not ready yet. `index.html` also runs auto-render once on load for the static card texts (`$…$`).
+
+### Graph problems
+
+A problem may carry `graph`: `{ x:{min,max,step,label}, y:{…}, lines:[{fn}], caption, ariaLabel }`, drawn by `renderGraph` below the question. The user can move the pointer (or a finger) along the graph to read a marker and its coordinates (x snaps to whole numbers; the guide lines and the label are SVG elements in `.graph-marker`). `text` is a story paragraph above the question; `question` replaces the default label; a problem without `latex` hides the formula block.
+
+`graph-problems.js`: `GRAPH_CONTEXTS` (in `graph-stories.js`) are the stories, 37 now (money jar, tank, sunflower, battery, candle, snow, taxi, hike, pages, printer, oven, Jussi's quests, pizza, snoozing, robot followers, chocolates, snail, cat drama, ice cream, homework, snowmobile fuel, buns, woodpile, reindeer hay, download, cookies, game coins, running log, lingonberries, lake ice, shovelling, stickers, coffee machine, penguin, chocolate fountain, cleaning robot, motivation); growing or shrinking, with Finnish names. Optional `maxRate` / `cap` keep the numbers believable.
+
+**No story appears in two levels:** the stories are dealt to the levels in turn (`value`, `equation`, `interpret`, by their position in the list, so append new stories at the END), and `pickContext(level)` chooses only among its level's stories, never repeating within the last 9 problems (a set of 10 shows 10 different stories). `func-compare` has its own stories with themes that do not occur in the others. To add a story, add an entry with all the fields the others have (graph wording, equation wording, question texts, meanings). `pickLine` chooses start `b`, rate `p/q` per unit and the grid so that the start value lies on a horizontal grid line and the line passes through a grid crossing again, so values can be read exactly. `func-equation` is the same stories but with an equation instead of a graph (`S = 5w + 45`, shown as display math inside `text`): change over a period (units shown cancelling), value at a time, time to reach a value, the start, or a multiple-choice "what does this number mean" (`a ≠ b` is enforced so it is unambiguous; shrinking quantities never change by more than they hold). `func-compare` (in `compare-problems.js`, with its own 9 two-character stories) shows two equations in one display (`aligned`): when are they equal, the common value, how much more one has at time t, the difference of the rates or of the starts. The lines are built backwards from a meeting time t* (whole number) and a common value v*, so the answers are whole numbers; a story never repeats within the last 8 problems. `graph-value` asks for a value at a time, a time for a value, the start or the rate; `graph-interpret` is a `choice` problem of three kinds: the true statement among four (the right start and rate plus wrong starts / inverted or changed rates), which equation matches the graph (wrong signs, swapped start and rate, inverse rate, negative start), or which ordered pair is where the line crosses the vertical axis.
+
+For `choice` problems the answer area shows a radio list instead of text inputs (`buildChoices`, `renderAnswerState`, `readInputs` in `ui.js`); a wrong option is highlighted amber, the right one green.
 
 ## Embedding options (URL parameters)
 

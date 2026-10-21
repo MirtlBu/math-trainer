@@ -13,6 +13,7 @@ const TEXTS = {
     equations: 'Equations',
     expressions: 'Expressions',
     inequalities: 'Inequalities',
+    graphs: 'Functions & Graphs',
   },
 
   // ─── practice screen ────────────────────────────────────────────────────────
@@ -21,6 +22,11 @@ const TEXTS = {
     simplifyLabel: 'Expand and simplify:',
     inequalityLabel: 'Solve the inequality:',
     radicalLabel: 'Simplify:',
+    valueLabel: 'Read the graph:',
+    whichTrue: 'Based on the graph, which of these statements is true?',
+    whichEquation: 'Which equation matches the graph?',
+    whichPoint: 'Which ordered pair is the point where the line crosses the vertical axis?',
+    graphHint: 'Move the cursor along the line (or drag a finger) to read values.',
     numberPlaceholder: 'your answer',
     expressionPlaceholder: 'e.g. 5x^2 - 3x + 1',
     intervalPlaceholder: 'e.g. x > 1',
@@ -33,6 +39,7 @@ const TEXTS = {
   // ─── answer checking ────────────────────────────────────────────────────────
   feedback: {
     notANumber: 'Please enter a number.',
+    chooseOne: 'Please choose an answer.',
     notAnInterval: 'Please enter an interval like x > 4, -3 < x < 2 or (-3, 2].',
     fillAll: 'Please fill in all the fields.',
     notARadical: 'Please enter an expression like 3√6 - 2 (√ can be typed as sqrt, e.g. 3*sqrt(6)).',
@@ -75,6 +82,17 @@ const TEXTS = {
     original: 'Write the original equation.',
     originalExpression: 'Write the original expression.',
     originalInequality: 'Write the original inequality.',
+    soEquationUp: 'The quantity starts at the starting value and grows by the rate each time unit, so the equation is:',
+    soEquationDown: 'The quantity starts at the starting value and shrinks by the rate each time unit (the rate is subtracted), so the equation is:',
+    soPoint: 'So the point is:',
+    // comparing two linear functions
+    equalExpressions: 'They have the same value when the two expressions are equal.',
+    collectTerms: (v) => `Move the terms with $${v}$ to one side and the numbers to the other side.`,
+    substituteEither: 'Substitute this time into either equation.',
+    computeBoth: (v, t) => `Substitute $${v} = ${t}$ into both equations.`,
+    subtractValues: 'Subtract the smaller number from the larger one.',
+    rateIsCoefficient: (v) => `The rate of change is the number multiplying $${v}$ in each equation.`,
+    startIsConstant: (v) => `The starting value is the number without $${v}$: the value when $${v} = 0$.`,
     // square roots
     squareFactor: 'Find the largest perfect square that divides the number under the root.',
     splitRoot: 'Split the root of a product into a product of roots: $\\sqrt{ab} = \\sqrt{a} \\cdot \\sqrt{b}$.',
