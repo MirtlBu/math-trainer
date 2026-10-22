@@ -14,6 +14,7 @@ const TEXTS = {
     expressions: 'Expressions',
     inequalities: 'Inequalities',
     graphs: 'Functions & Graphs',
+    numbers: 'Numbers',
   },
 
   // ─── practice screen ────────────────────────────────────────────────────────
@@ -26,6 +27,9 @@ const TEXTS = {
     whichTrue: 'Based on the graph, which of these statements is true?',
     whichEquation: 'Which equation matches the graph?',
     whichPoint: 'Which ordered pair is the point where the line crosses the vertical axis?',
+    multiHint: 'Select all that apply.',
+    fractionPlaceholder: 'e.g. -3/4',
+    fractionHint: 'Write a fraction like 3/4 in lowest terms (a minus sign goes in front).',
     graphHint: 'Move the cursor along the line (or drag a finger) to read values.',
     numberPlaceholder: 'your answer',
     expressionPlaceholder: 'e.g. 5x^2 - 3x + 1',
@@ -40,6 +44,9 @@ const TEXTS = {
   feedback: {
     notANumber: 'Please enter a number.',
     chooseOne: 'Please choose an answer.',
+    chooseAtLeastOne: 'Please select at least one option.',
+    notAFraction: 'Please enter a fraction like -3/4 (or a whole number).',
+    notLowest: 'Write the fraction in lowest terms.',
     notAnInterval: 'Please enter an interval like x > 4, -3 < x < 2 or (-3, 2].',
     fillAll: 'Please fill in all the fields.',
     notARadical: 'Please enter an expression like 3√6 - 2 (√ can be typed as sqrt, e.g. 3*sqrt(6)).',
@@ -75,6 +82,28 @@ const TEXTS = {
     notPassed: 'Another set at this level might help.',
     nextLevel: (label) => `Next level: ${label}`,
     backToTopics: 'Back to topics',
+  },
+
+  // ─── number sets, decimals and fractions ────────────────────────────────────
+  numbers: {
+    definitions: 'Natural numbers (luonnolliset luvut) are 0, 1, 2, 3, … (in Finland 0 is included). Integers (kokonaisluvut) are the whole numbers with their negatives: …, −2, −1, 0, 1, 2, … Rational numbers (rationaaliluvut) can be written as a fraction of two integers. Irrational numbers (irrationaaliluvut) cannot. Together they make up the real numbers (reaaliluvut).',
+    simplifyFirst: 'First simplify the number.',
+    whyNatural: 'It is a whole number that is not negative, so it is a natural number. Every natural number is also an integer, a rational number and a real number.',
+    whyNegativeInteger: 'It is a whole number, but negative: so it is an integer, not a natural number. It is also a rational and a real number.',
+    whyNotWhole: 'It is not a whole number, so it is neither a natural number nor an integer.',
+    endingDecimalAsFraction: 'A decimal number that ends can be written as a fraction, so it is rational:',
+    repeatingDecimalAsFraction: 'A repeating decimal can always be written as a fraction, so it is rational:',
+    alreadyFraction: 'It is a fraction of two integers, so it is a rational number.',
+    whyIrrational: (n) => `$\\sqrt{${n}}$ is not a whole number and ${n} is not a square number, so its decimal expansion never ends and never repeats. It cannot be written as a fraction: it is irrational.`,
+    whyPi: '$\\pi = 3.14159\\ldots$ has a decimal expansion that never ends and never repeats, so it cannot be written as a fraction: it is irrational (and so is any non-zero whole-number multiple of it).',
+    belongsTo: (names) => `So the number belongs to: ${names.join('; ')}.`,
+    smallestIs: (name) => `The smallest of the sets that contains it is: ${name}.`,
+    overPowerOfTen: (k) => `Write the digits over 1 followed by as many zeros as there are decimal places (${k}).`,
+    divideByGcd: (g) => `Divide the numerator and the denominator by their greatest common divisor, ${g}.`,
+    letX: 'Let $x$ be the number.',
+    shiftPeriod: (k) => `Multiply by ${10 ** k} to move one whole period in front of the decimal point; the repeating part stays the same.`,
+    subtractEquations: 'Subtract the first equation from the second: the repeating parts cancel.',
+    solveForX: 'Solve for $x$ and reduce the fraction.',
   },
 
   // ─── solution steps (equations.js) ──────────────────────────────────────────

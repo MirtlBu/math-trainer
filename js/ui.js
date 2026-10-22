@@ -31,6 +31,9 @@ const currentItem = () => session.items[session.index];
 /** The answer fields on screen, in order */
 const inputEls = () => [...answerInputs.querySelectorAll('input')];
 
+/** Questions answered by picking options: one option (radio buttons) or several (checkboxes) */
+const isChoiceKind = kind => kind === 'choice' || kind === 'multi';
+
 /** How many fields a problem needs: one per interval / solution when the answer is a set, else one */
 const answerCount = problem =>
   (problem && (problem.kind === 'intervals' || problem.kind === 'numbers')) ? problem.answer.length : 1;
@@ -88,11 +91,12 @@ const views = {
   expressions: document.getElementById('view-expressions'),
   inequalities: document.getElementById('view-inequalities'),
   graphs:    document.getElementById('view-graphs'),
+  numbers:   document.getElementById('view-numbers'),
   practice:  document.getElementById('view-practice'),
 };
 
 const breadcrumb      = document.getElementById('breadcrumb');
-const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs'];   // views that list subtopic cards
+const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs', 'numbers'];   // views that list subtopic cards
 
 const problemText     = document.getElementById('problem-text');
 const problemGraph    = document.getElementById('problem-graph');
@@ -121,6 +125,7 @@ const btnRepeat       = document.getElementById('btn-repeat');
 function showView(name) {
   Object.values(views).forEach(v => v.classList.remove('active'));
   views[name].classList.add('active');
+  if (window.scrollY > 0) window.scrollTo(0, 0);   // a new screen starts at the top
 }
 
 function goHome() {
@@ -245,6 +250,16 @@ function goTo(i) {
   currentItem().inputs = readInputs();
   session.index = i;
   showProblem();
+  revealProblemTop();
+}
+
+/**
+ * After Prev / Next (which sit at the bottom of the page) bring the top of the new problem
+ * back into view, but only if it is currently scrolled out of sight above the window.
+ */
+function revealProblemTop() {
+  const top = views.practice.getBoundingClientRect().top;
+  if (top < 0) window.scrollTo({ top: window.scrollY + top, behavior: 'smooth' });
 }
 
 function renderProgress() {
@@ -317,6 +332,8 @@ function setupForKind(kind) {
     radicals:  TEXTS.practice.radicalHint,
     numbers:   TEXTS.practice.numbersHint,
     intervals: TEXTS.practice.intervalHint,
+    multi:     TEXTS.practice.multiHint,
+    fraction:  TEXTS.practice.fractionHint,
   };
   answerHint.textContent   = hints[kind] || '';
   answerHint.style.display = hints[kind] ? '' : 'none';
@@ -346,6 +363,7 @@ function buildInputs(kind, count) {
     simplify:  TEXTS.practice.expressionPlaceholder,
     radicals:  TEXTS.practice.radicalPlaceholder,
     value:     TEXTS.practice.numberPlaceholder,
+    fraction:  TEXTS.practice.fractionPlaceholder,
     intervals: TEXTS.practice.intervalPlaceholder,
   };
   const numeric = kind === 'solve' || kind === 'numbers';   // answers like "x = 5"
@@ -385,23 +403,26 @@ const DEFAULT_LABELS = {
   intervals: TEXTS.practice.inequalityLabel,
   value:     TEXTS.practice.valueLabel,
   choice:    TEXTS.practice.whichTrue,
+  multi:     TEXTS.practice.multiHint,
+  fraction:  TEXTS.practice.valueLabel,
 };
 
-/** Multiple choice: one radio button per option (options may contain $…$) */
+/** Multiple choice: one radio button (or checkbox, for 'multi') per option (options may contain $…$) */
 function buildChoices(problem) {
+  const multi = problem.kind === 'multi';
   inputsBuiltFor = null;
   answerInputs.innerHTML = '';
 
   const list = document.createElement('div');
   list.className = 'choice-list';
-  list.setAttribute('role', 'radiogroup');
+  list.setAttribute('role', multi ? 'group' : 'radiogroup');
 
   problem.options.forEach((text, i) => {
     const label = document.createElement('label');
     label.className = 'choice';
 
     const input = document.createElement('input');
-    input.type  = 'radio';
+    input.type  = multi ? 'checkbox' : 'radio';
     input.name  = 'choice';
     input.value = String(i);
 
@@ -420,22 +441,28 @@ function buildChoices(problem) {
 
 /** What the user has typed / chosen, one string per field (a single string for multiple choice) */
 function readInputs() {
-  if (currentItem().problem.kind === 'choice') {
+  const kind = currentItem().problem.kind;
+  if (kind === 'choice') {
     const chosen = answerInputs.querySelector('input[type="radio"]:checked');
     return [chosen ? chosen.value : ''];
+  }
+  if (kind === 'multi') {                       // "0,2,4": the ticked options
+    const ticked = [...answerInputs.querySelectorAll('input[type="checkbox"]:checked')].map(c => c.value);
+    return [ticked.join(',')];
   }
   return inputEls().map(el => el.value);
 }
 
 /** Put the item's state (typed text / chosen option, solved, wrong fields) onto the fields */
 function renderAnswerState(item) {
-  if (item.problem.kind === 'choice') {
-    answerInputs.querySelectorAll('input[type="radio"]').forEach((radio, i) => {
-      const label = radio.closest('label');
-      radio.checked  = item.inputs[0] === String(i);
-      radio.disabled = item.solved;
+  if (isChoiceKind(item.problem.kind)) {
+    const ticked = item.inputs[0] === '' ? [] : item.inputs[0].split(',');
+    answerInputs.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((box, i) => {
+      const label = box.closest('label');
+      box.checked  = ticked.includes(String(i));
+      box.disabled = item.solved;
       label.classList.remove('correct', 'incorrect');
-      if (item.solved && radio.checked)                       label.classList.add('correct');
+      if (item.solved && box.checked)                              label.classList.add('correct');
       else if (!item.solved && item.wrong && item.bad.includes(i)) label.classList.add('incorrect');
     });
     return;
@@ -474,9 +501,9 @@ function showProblem() {
   else               problemGraph.innerHTML = '';
 
   setupForKind(kind);
-  if (kind === 'choice') buildChoices(problem);
+  if (isChoiceKind(kind)) buildChoices(problem);
   else                   buildInputs(kind, answerCount(problem));
-  answerRow.classList.toggle('choice', kind === 'choice');
+  answerRow.classList.toggle('choice', isChoiceKind(kind));
 
   renderAnswerState(item);
   btnCheck.disabled    = item.solved;
@@ -498,7 +525,19 @@ function showProblem() {
 
   renderProgress();
   updateNav();
-  if (kind !== 'choice') inputEls()[0].focus();
+  if (!isChoiceKind(kind)) focusAnswer();
+}
+
+/**
+ * Put the cursor in the first answer field, but only if it is already on screen:
+ * focusing a field far down the page (a tall graph problem) must not scroll the page to it,
+ * and on phones it would pop up the keyboard for a field the user cannot see.
+ */
+function focusAnswer() {
+  const field = inputEls()[0];
+  if (!field) return;
+  const box = field.getBoundingClientRect();
+  if (box.top >= 0 && box.bottom <= window.innerHeight) field.focus({ preventScroll: true });
 }
 
 // ─── answer checking ──────────────────────────────────────────────────────────
@@ -509,6 +548,22 @@ function showProblem() {
  *  bad  — for 'wrong': indexes of the fields that are wrong
  */
 function judgeAnswer(rawInputs, problem) {
+  if (problem.kind === 'multi') {
+    if (rawInputs[0] === '') return { status: 'hint', message: TEXTS.feedback.chooseAtLeastOne };
+    const chosen  = rawInputs[0].split(',').map(Number);
+    const extra   = chosen.filter(i => !problem.answer.includes(i));        // ticked but wrong
+    const missing = problem.answer.filter(i => !chosen.includes(i));        // not ticked but right
+    return (extra.length || missing.length) ? { status: 'wrong', bad: extra } : { status: 'correct' };
+  }
+
+  if (problem.kind === 'fraction') {
+    const parsed = parseFraction(rawInputs[0]);
+    if (parsed.error) return { status: 'hint', message: TEXTS.feedback.notAFraction };
+    if (!fractionsEqual(parsed.fraction, problem.answer)) return { status: 'wrong', bad: [0] };
+    if (!isLowestTerms(parsed.fraction))                  return { status: 'hint', message: TEXTS.feedback.notLowest };
+    return { status: 'correct' };
+  }
+
   if (problem.kind === 'choice') {
     if (rawInputs[0] === '') return { status: 'hint', message: TEXTS.feedback.chooseOne };
     const chosen = Number(rawInputs[0]);
@@ -584,7 +639,7 @@ function checkAnswer() {
     renderAnswerState(item);
     feedback.textContent = TEXTS.feedback.wrong;
     feedback.className   = 'feedback incorrect';
-    if (item.problem.kind !== 'choice') inputEls()[verdict.bad[0]].select();
+    if (!isChoiceKind(item.problem.kind) && verdict.bad.length) inputEls()[verdict.bad[0]].select();
     return;
   }
 
@@ -704,8 +759,8 @@ answerInputs.addEventListener('input', e => {
   const item = currentItem();
   if (item.solved) return;
 
-  if (item.problem.kind === 'choice') {          // a different option was picked
-    item.inputs = [e.target.value];
+  if (isChoiceKind(item.problem.kind)) {         // an option was picked or ticked
+    item.inputs = readInputs();
     item.bad    = [];
     item.wrong  = false;
     renderAnswerState(item);
@@ -729,7 +784,7 @@ answerInputs.addEventListener('keydown', e => {
   const els = inputEls();
   const i   = els.indexOf(e.target);
 
-  if (currentItem().problem.kind === 'choice') {   // on a radio button: check the chosen option
+  if (isChoiceKind(currentItem().problem.kind)) {  // on a radio button / checkbox: check the answer
     if (!currentItem().solved) checkAnswer();
     return;
   }

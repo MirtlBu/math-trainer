@@ -64,8 +64,9 @@
   --clr-hard-text: #991b1b;
   --fs-control: 1rem;
   /* one size for inputs, buttons and feedback */
-  --radius: 12px;
-  --shadow: 0 1px 4px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .06);
+  --clr-divider: rgba(29, 36, 51, .14);   /* thin semi-transparent lines between blocks, works on any background */
+  --clr-hover: rgba(26, 115, 232, .06);   /* faint tint under the item the pointer is over */
+  --radius-control: 8px;                  /* corners of inputs and buttons only */
   --font: 'Open Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   font-family: var(--font);
@@ -187,7 +188,7 @@
   display: none;
   max-width: 900px;
   margin: 0 auto;
-  padding: 40px 24px 80px;
+  padding: 20px 24px 80px;
 }
 
 .math-trainer .view.active {
@@ -218,25 +219,25 @@
    ============================================================ */
 .math-trainer .topic-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);   /* three in a row (one column on tablet and phone, see Responsive) */
+  column-gap: 24px;
+  row-gap: 0;
 }
 
 .math-trainer .topic-card {
   text-align: center;
-  background: var(--clr-surface);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius);
+  border-bottom: 1px solid var(--clr-divider);
   padding: 28px 24px;
   cursor: pointer;
-  transition: box-shadow .15s, border-color .15s, transform .12s;
   user-select: none;
 }
 
-.math-trainer .topic-card:hover:not(.disabled) {
-  box-shadow: var(--shadow);
-  border-color: var(--clr-primary);
-  transform: translateY(-2px);
+.math-trainer .topic-card h2 {
+  transition: color .15s;
+}
+
+.math-trainer .topic-card:hover:not(.disabled) h2 {
+  color: var(--clr-primary);
 }
 
 .math-trainer .topic-card.disabled {
@@ -280,22 +281,23 @@
 .math-trainer .subtopic-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  border-top: 1px solid var(--clr-divider);
 }
 
+/* rows with a rule underneath; the title turns blue under the pointer */
 .math-trainer .subtopic-card {
   position: relative;
-  background: var(--clr-surface);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius);
-  padding: 22px 26px;
+  border-bottom: 1px solid var(--clr-divider);
+  padding: 22px 0;
   cursor: pointer;
-  transition: box-shadow .15s, border-color .15s;
 }
 
-.math-trainer .subtopic-card:hover:not(.disabled) {
-  box-shadow: var(--shadow);
-  border-color: var(--clr-primary);
+.math-trainer .subtopic-card h3 {
+  transition: color .15s;
+}
+
+.math-trainer .subtopic-card:hover:not(.disabled) h3 {
+  color: var(--clr-primary);
 }
 
 .math-trainer .subtopic-card.disabled {
@@ -308,7 +310,7 @@
   display: none;
   position: absolute;
   top: 18px;
-  right: 22px;
+  right: 0;
   width: 24px;
   height: 24px;
   color: var(--clr-success);
@@ -366,28 +368,13 @@
    Practice view
    ============================================================ */
 .math-trainer .practice-container {
-  max-width: 100%;
-}
-
-/* two equal columns: problem on the left, solution on the right */
-.math-trainer .practice-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px;
-  align-items: start;
-}
-
-.math-trainer .practice-col {
-  min-width: 0;
-}
-
-.math-trainer .practice-col .btn-ghost {
-  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 /* Session progress */
 .math-trainer .progress {
-  margin-bottom: 20px;
+  margin-bottom: 60px;
 }
 
 .math-trainer .progress-header {
@@ -439,7 +426,8 @@
 /* Set complete panel */
 .math-trainer .session-complete {
   margin-top: 28px;
-  padding: 24px 0;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--clr-divider);
 }
 
 .math-trainer .session-complete h3 {
@@ -460,11 +448,9 @@
 }
 
 .math-trainer .problem-box {
-  background: var(--clr-surface);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius);
-  padding: 32px 36px;
-  margin-bottom: 28px;
+  padding: 0 0 28px;
+  margin-bottom: 56px;
+  border-bottom: 1px solid var(--clr-divider);
 }
 
 .math-trainer .problem-text {
@@ -477,9 +463,13 @@
 
 .math-trainer .problem-label {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 20px;
   color: var(--clr-text);
+}
+
+.math-trainer .problem-box .katex {
+  font-size: 2rem;
 }
 
 /* ============================================================
@@ -567,23 +557,25 @@
 .math-trainer .choice-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .math-trainer .choice {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 14px;
-  border: 2px solid var(--clr-border);
-  border-radius: 8px;
-  background: var(--clr-surface);
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--clr-divider);
   cursor: pointer;
-  transition: border-color .15s, background .15s;
+  transition: background .15s;
+}
+
+.math-trainer .choice:last-child {
+  border-bottom: none;
 }
 
 .math-trainer .choice:hover {
-  border-color: var(--clr-primary);
+  background: var(--clr-hover);
 }
 
 .math-trainer .choice input {
@@ -592,14 +584,15 @@
   flex-shrink: 0;
 }
 
+/* a coloured bar on the left and a faint tint mark the state */
 .math-trainer .choice.incorrect {
-  border-color: var(--clr-retry);
-  background: var(--clr-retry-bg);
+  background: rgba(245, 158, 11, .12);
+  box-shadow: inset 3px 0 0 var(--clr-retry);
 }
 
 .math-trainer .choice.correct {
-  border-color: var(--clr-success);
-  background: #f0fdf4;
+  background: rgba(22, 163, 74, .10);
+  box-shadow: inset 3px 0 0 var(--clr-success);
 }
 
 .math-trainer .choice:has(input:disabled) {
@@ -614,14 +607,14 @@
 }
 
 /* Answer area */
-.math-trainer .answer-area {
-  margin-bottom: 24px;
-}
+
 
 .math-trainer .answer-row {
   display: flex;
   align-items: flex-end;   /* Check stays next to the last input when there are several */
   gap: 12px;
+  padding: 0;
+  border-bottom: 0;
 }
 
 .math-trainer .answer-prefix {
@@ -657,7 +650,7 @@
   height: 44px;
   padding: 0 14px;
   border: 2px solid var(--clr-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   font-size: var(--fs-control);
   font-family: var(--font);
   color: var(--clr-text);
@@ -703,7 +696,7 @@
   height: 44px;
   padding: 0 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   font-size: var(--fs-control);
   font-family: var(--font);
   font-weight: 600;
@@ -727,13 +720,13 @@
 }
 
 .math-trainer .btn-secondary {
-  background: var(--clr-surface);
+  background: transparent;
   color: var(--clr-primary);
   border: 2px solid var(--clr-primary);
 }
 
 .math-trainer .btn-secondary:hover {
-  background: #eff6ff;
+  background: var(--clr-hover);
 }
 
 .math-trainer .btn-ghost {
@@ -747,10 +740,39 @@
   color: var(--clr-text);
 }
 
+.math-trainer .solution-area {
+  margin-bottom: 48px;
+}
+
+/* previous / next sit at the very end, under a rule */
+/* a button that looks like plain blue text (the solution toggle) */
+.math-trainer .btn-link {
+  height: auto;
+  padding: 6px 0;
+  border: none;
+  background: transparent;
+  color: var(--clr-primary);
+  font-weight: 600;
+}
+
+.math-trainer .btn-link:hover {
+  color: var(--clr-primary-h);
+  text-decoration: underline;
+}
+
+.math-trainer .btn-link:focus-visible {
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .math-trainer .practice-actions {
   display: flex;
+  justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+  padding-top: 56px;
+  border-top: 1px solid var(--clr-divider);
 }
 
 /* ============================================================
@@ -758,70 +780,47 @@
    ============================================================ */
 .math-trainer .steps-box {
   margin-top: 16px;
-  background: var(--clr-surface);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius);
   position: relative;
-  overflow: hidden;   /* clips the scroller and the edge fades to the rounded corners */
-}
-
-/* fades on the left / right edge, shown only while there is more to scroll that way
-   (the classes are set by updateStepsFade in ui.js) */
-.math-trainer .steps-box::before,
-.math-trainer .steps-box::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 36px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .15s;
-  z-index: 1;
-}
-
-.math-trainer .steps-box::before {
-  left: 0;
-  background: linear-gradient(to right, var(--clr-surface), transparent);
-}
-
-.math-trainer .steps-box::after {
-  right: 0;
-  background: linear-gradient(to left, var(--clr-surface), transparent);
-}
-
-.math-trainer .steps-box.fade-left::before,
-.math-trainer .steps-box.fade-right::after {
-  opacity: 1;
 }
 
 /* the whole solution scrolls sideways when a formula is too wide;
-   the scrollbar is styled so it stays visible instead of hiding like the system overlay one */
+   the edges fade out (a mask, so it works on any background, even a transparent one) only
+   on the sides where there is more to scroll (classes set by updateStepsFade in ui.js).
+   The scrollbar is styled so it stays visible instead of hiding like the system overlay one */
 .math-trainer .steps-scroll {
-  --pad-x: 32px;
-  padding: 28px var(--pad-x);
+  --pad-x: 24px;            /* free space after the end of a wide formula */
+  --fade-l: 0px;
+  --fade-r: 0px;
+  padding: 16px 0 12px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
-  scrollbar-color: #b4bccb var(--clr-bg);
+  scrollbar-color: #b4bccb transparent;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
 }
+
+.math-trainer .steps-box.fade-left .steps-scroll  { --fade-l: 36px; }
+.math-trainer .steps-box.fade-right .steps-scroll { --fade-r: 36px; }
 
 .math-trainer .steps-scroll::-webkit-scrollbar {
   height: 10px;
 }
 
 .math-trainer .steps-scroll::-webkit-scrollbar-track {
-  background: var(--clr-bg);
+  background: transparent;
 }
 
 .math-trainer .steps-scroll::-webkit-scrollbar-thumb {
   background: #b4bccb;
+  background-clip: padding-box;
   border-radius: 5px;
-  border: 2px solid var(--clr-bg);
+  border: 2px solid transparent;
 }
 
 .math-trainer .steps-scroll::-webkit-scrollbar-thumb:hover {
   background: var(--clr-muted);
+  background-clip: padding-box;
 }
 
 .math-trainer .steps-box h3 {
@@ -887,9 +886,11 @@
   padding-right: var(--pad-x);
 }
 
-/* KaTeX adds vertical margins to display formulas; the block has its own padding */
-.math-trainer .step-math .katex-display {
-  margin: 0;
+/* KaTeX gives every display formula a 1em vertical margin; here it is 0.5em.
+   Scoped to .math-trainer, which already beats KaTeX's own rule (no !important needed)
+   and leaves the host site's formulas alone. */
+.math-trainer .katex-display {
+  margin: 0.5em 0;
 }
 
 /* formulas at the same size as paragraphs; scoped so the host site's own KaTeX is untouched */
@@ -900,14 +901,24 @@
 /* ============================================================
    Responsive
    ============================================================ */
-@media (max-width: 720px) {
-  .math-trainer .practice-columns {
+/* Desktop: the cards form rows of three, every row except the last one has a rule under it.
+   The last row is the card that starts it (1st, 4th, 7th, ... counting from the end: one of
+   the last three) and the cards after it. Works for any number of cards. */
+@media (min-width: 901px) {
+  .math-trainer .topic-card:nth-child(3n+1):nth-last-child(-n+3),
+  .math-trainer .topic-card:nth-child(3n+1):nth-last-child(-n+3) ~ .topic-card {
+    border-bottom: none;
+  }
+}
+
+/* Tablet and phone: one column, every card has a rule under it except the last one */
+@media (max-width: 900px) {
+  .math-trainer .topic-grid {
     grid-template-columns: 1fr;
-    gap: 0;
   }
 
-  .math-trainer .practice-col+.practice-col {
-    margin-top: 4px;
+  .math-trainer .topic-card:last-child {
+    border-bottom: none;
   }
 }
 
@@ -917,7 +928,7 @@
   }
 
   .math-trainer .problem-box {
-    padding: 24px 20px;
+    padding-bottom: 20px;
   }
 
   .math-trainer .problem-equation {
@@ -934,7 +945,6 @@
   }
 
   .math-trainer .steps-scroll {
-    --pad-x: 18px;
-    padding: 20px var(--pad-x);
+    --pad-x: 16px;
   }
 }

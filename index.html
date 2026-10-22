@@ -71,6 +71,12 @@
           <p>Reading and interpreting graphs</p>
         </div>
 
+        <div class="topic-card" data-topic="numbers">
+          <div class="topic-icon">&#xBD;</div>
+          <h2>Numbers</h2>
+          <p>Number sets, decimals and fractions</p>
+        </div>
+
         <div class="topic-card disabled">
           <div class="topic-icon">&#x25B3;</div>
           <h2>Geometry</h2>
@@ -328,6 +334,34 @@
       </section>
     </main>
 
+    <!-- NUMBERS VIEW: subtopic list -->
+    <main id="view-numbers" class="view" data-topic="numbers">
+      <section class="subtopic-header">
+        <h1>Numbers</h1>
+        <p>Choose a type to practice</p>
+      </section>
+
+      <section class="subtopic-list">
+
+        <div class="subtopic-card" data-subtopic="numset-sets">
+          <div class="subtopic-meta">
+            <span class="difficulty easy">Beginner</span>
+          </div>
+          <h3>Number Sets — Lukujoukot</h3>
+          <p>Which kind of number is $-15.5$? Natural, integer, rational, irrational, real</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="numdec-fractions">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Decimals and Fractions — Desimaaliluvut ja murtoluvut</h3>
+          <p>Write $0.75$ or $0.\overline{27}$ as a fraction in lowest terms</p>
+        </div>
+
+      </section>
+    </main>
+
     <!-- PRACTICE VIEW: the actual exercise -->
     <main id="view-practice" class="view">
 
@@ -342,56 +376,45 @@
           <div class="progress-track" id="progress-track"><!-- segments filled by JS --></div>
         </div>
 
-        <div class="practice-columns">
+        <!-- 1. the problem -->
+        <div class="problem-box">
+          <!-- story / context for word problems; hidden when empty -->
+          <div class="problem-text" id="problem-text" style="display:none;"></div>
+          <div class="problem-label" id="problem-label"><!-- filled by JS --></div>
+          <div class="problem-equation" id="problem-equation"><!-- filled by JS --></div>
+          <!-- interactive graph for graph problems -->
+          <div class="problem-graph" id="problem-graph" style="display:none;"></div>
+        </div>
 
-          <!-- LEFT column: problem, answer, next -->
-          <div class="practice-col">
+        <!-- 2. the answer -->
+        <div class="answer-area">
+          <div class="answer-row" id="answer-row">
+            <!-- one input per expected answer (or the answer options), created by JS -->
+            <div class="answer-inputs" id="answer-inputs"></div>
+            <button class="btn btn-primary" id="btn-check">Check</button>
+          </div>
+          <div class="answer-hint" id="answer-hint" style="display:none;"></div>
+          <div class="feedback" id="feedback"></div>
+        </div>
 
-            <!-- problem display -->
-            <div class="problem-box">
-              <!-- story / context for word problems; hidden when empty -->
-              <div class="problem-text" id="problem-text" style="display:none;"></div>
-              <div class="problem-label" id="problem-label"><!-- filled by JS --></div>
-              <div class="problem-equation" id="problem-equation"><!-- filled by JS --></div>
-              <!-- interactive graph for graph problems -->
-              <div class="problem-graph" id="problem-graph" style="display:none;"></div>
+        <!-- 3. the step-by-step solution (hidden until asked for) -->
+        <div class="solution-area">
+          <button class="btn btn-link" id="btn-steps">Step-by-step solution</button>
+
+          <div class="steps-box" id="steps-box" style="display:none;">
+            <!-- the scrolling part; the box itself carries the edge fades -->
+            <div class="steps-scroll" id="steps-scroll">
+              <h3>Solution</h3>
+              <ol class="steps-list" id="steps-list"><!-- filled by JS --></ol>
             </div>
+          </div>
+        </div>
 
-            <!-- answer input -->
-            <div class="answer-area">
-              <div class="answer-row" id="answer-row">
-                <!-- one input per expected answer (or the answer options), created by JS -->
-                <div class="answer-inputs" id="answer-inputs"></div>
-                <button class="btn btn-primary" id="btn-check">Check</button>
-              </div>
-              <div class="answer-hint" id="answer-hint" style="display:none;"></div>
-              <div class="feedback" id="feedback"></div>
-            </div>
-
-            <!-- action buttons -->
-            <div class="practice-actions">
-              <button class="btn btn-secondary" id="btn-prev">Prev problem</button>
-        <button class="btn btn-secondary" id="btn-next">Next problem</button>
-            </div>
-
-          </div><!-- /left column -->
-
-          <!-- RIGHT column: solution toggle + solution (hidden by default) -->
-          <div class="practice-col">
-
-            <button class="btn btn-secondary" id="btn-steps">Step-by-step solution</button>
-
-            <div class="steps-box" id="steps-box" style="display:none;">
-              <!-- the scrolling part; the box itself keeps its border and the edge fades -->
-              <div class="steps-scroll" id="steps-scroll">
-                <h3>Solution</h3>
-                <ol class="steps-list" id="steps-list"><!-- filled by JS --></ol>
-              </div>
-            </div>
-
-          </div><!-- /right column -->
-
-        </div><!-- /.practice-columns -->
+        <!-- 4. previous / next problem -->
+        <div class="practice-actions">
+          <button class="btn btn-secondary" id="btn-prev">Prev problem</button>
+          <button class="btn btn-secondary" id="btn-next">Next problem</button>
+        </div>
 
         <!-- set complete: repeat level or move on (hidden by default) -->
         <div class="session-complete" id="session-complete" style="display:none;">
@@ -422,6 +445,7 @@
   <script src="js/graph-stories.js"></script>
   <script src="js/graph-problems.js"></script>
   <script src="js/compare-problems.js"></script>
+  <script src="js/number-problems.js"></script>
   <script src="js/inequalities.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/embed.js"></script>

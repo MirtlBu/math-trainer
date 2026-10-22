@@ -8,6 +8,7 @@
  * Returns { value } or { error: 'empty' | 'invalid' }.
  */
 function parseNumber(raw) {
+  if (/\d\s+\d/.test(raw)) return { error: 'invalid' };   // "1 5" is not 15
   const s = raw
     .toLowerCase()
     .replace(/[−–—]/g, '-')
@@ -40,4 +41,48 @@ function unmatchedNumbers(given, expected) {
     else used[j] = true;
   });
   return bad;
+}
+
+// ─── fractions ────────────────────────────────────────────────────────────────
+
+function gcdInt(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b) { [a, b] = [b, a % b]; }
+  return a;
+}
+
+/**
+ * Turn what the user typed into a fraction { num, den } (den > 0): 3/4, -3/4, 5, −7/2.
+ * Returns { fraction } or { error: 'empty' | 'invalid' }.
+ */
+function parseFraction(raw) {
+  if (/\d\s+\d/.test(raw)) return { error: 'invalid' };   // "1 1/2" (a mixed number) is not 11/2
+  const s = raw
+    .replace(/[−–—]/g, '-')
+    .replace(/\s+/g, '');
+  if (s === '') return { error: 'empty' };
+
+  let m = s.match(/^([+-]?)(\d+)\/(\d+)$/);
+  if (m && Number(m[3]) !== 0) {
+    return { fraction: { num: (m[1] === '-' ? -1 : 1) * Number(m[2]), den: Number(m[3]) } };
+  }
+  m = s.match(/^([+-]?)(\d+)$/);
+  if (m) return { fraction: { num: (m[1] === '-' ? -1 : 1) * Number(m[2]), den: 1 } };
+
+  return { error: 'invalid' };
+}
+
+/** num/den with no common factor */
+function isLowestTerms(f) {
+  return gcdInt(f.num, f.den) === 1;
+}
+
+function fractionsEqual(a, b) {
+  return a.num * b.den === b.num * a.den;
+}
+
+function reduceFraction(num, den) {
+  const g = gcdInt(num, den) || 1;
+  const sign = den < 0 ? -1 : 1;
+  return { num: sign * num / g, den: sign * den / g };
 }
