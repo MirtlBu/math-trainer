@@ -1,4 +1,4 @@
-# How Math Trainer works
+# How Two and Two-Thirds works
 
 Notes for myself (and for Claude in a future session): what the pieces are, how data flows, and how to add things. Planned work is in [TODO.md](TODO.md).
 
@@ -27,12 +27,13 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/word-problems.js` | Word problems (sanalliset tehtävät): parts of a whole, consecutive numbers, perimeter, quadratic area/product problems. |
 | `js/fraction-equations.js` | Equations with fractions: clear them by multiplying every term by the lowest common denominator. |
 | `js/proportion-problems.js` | Direct and inverse proportionality (suoraan / kääntäen verrannollisuus), incl. squares, cubes and tables. |
+| `js/model-problems.js` | Linear-model word problems: model from data, containers with identical objects, consistency of information. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
 | `js/ui.js` | Everything that touches the page: routing, session, checking, rendering. |
 | `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → proportion-problems → inequalities → ui → embed`.
+`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → proportion-problems → model-problems → inequalities → ui → embed`.
 `expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`.
 
 ## Content model
@@ -46,7 +47,7 @@ Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`,
 | inequalities | `ineq-linear`, `ineq-product`, `ineq-quadratic`, `ineq-cubic`, `ineq-quartic` |
 | graphs | `graph-value`, `func-equation`, `func-compare`, `graph-interpret` |
 | numbers | `numset-sets`, `numdec-fractions` |
-| words | `word-parts`, `word-consecutive`, `word-geometry`, `word-quadratic`, `prop-direct`, `prop-inverse`, `prop-identify` |
+| words | `word-parts`, `word-consecutive`, `word-geometry`, `word-quadratic`, `model-data`, `model-decimal`, `model-containers`, `model-consistency`, `prop-direct`, `prop-inverse`, `prop-identify` |
 
 Home also has disabled placeholders (Functions & Graphs, Geometry).
 
@@ -115,6 +116,7 @@ session = { subtopic, index, finished, items: [{ problem, solved, inputs, wrong,
 - **Progress bar**: 10 segments (buttons). Green = solved (even after mistakes or peeking). Light grey = not solved. A blue ring marks the problem being viewed. Header shows "Problem n of 10" and "k solved".
 - **Finishing**: automatically when all 10 are solved, or by pressing "Finish set" (the Next button on problem 10). Unsolved problems stay grey and can still be solved afterwards. The end panel then stays visible.
 - **End panel**: summary text and two buttons: next level and "10 more at this level". The next level (first enabled card after the current one *in the same topic*) is highlighted when at least `PASS_THRESHOLD` (7) of the 10 problems are solved; otherwise "10 more" is highlighted. On the last level of a topic the button is "Back to topics".
+- **Set in progress**: `saveState()` (in `ui.js`) writes `{topic, subtopic, inPractice, session}` to `localStorage` (`math-trainer-session`) after every change (typing, check, next/prev, solution toggle, finish). On load `loadState()` validates it (10 items, a valid index; anything else is dropped) and restores the set: back on the practice screen if the user was there, otherwise the set resumes when the level card is clicked. `±Infinity` in interval problems is stored as `{"$inf": ±1}` (`saveReplacer` / `saveReviver`). Starting another level or "Try another set" overwrites it.
 - **Completed levels**: pressing the next-level / back-to-topics button calls `markCompleted(currentSubtopic)`, which stores the key in `localStorage` (`math-trainer-completed`; wrapped in try/catch) and shows the check on the card. The result of the set does not matter; "10 more" does not mark.
 
 ### Checking an answer
@@ -207,3 +209,7 @@ Scripts never hard-code user-facing strings; they use `TEXTS.*` from `js/texts.j
 ## Testing
 
 There is no test suite in the repo. While building, generators were verified by substituting values into the generated expression (answers must satisfy the equation, intervals must match a brute-force check) and the UI by driving it in jsdom / headless Chrome. Moving such checks into a `tests/` folder is in the TODO.
+
+### Model problems
+
+`model-problems.js`: all numbers are chosen so that every answer is a whole number. `model-data` (Linear Model from Data): a quantity changes at a constant rate (debt, flash drive, savings, printer, pool, battery, car, draining tank). Types: start value + one point, rate + one point, two points. Several labelled answer fields (`kind: 'numbers'`, `ordered: true`, `labels`), e.g. rate, start, value or time. `model-decimal` (Charging and Decimal Rates): a battery is charged / a file downloaded to 100 % at a decimal rate (0.5 … 3.5 per time unit); times are multiples of the smallest m for which r·m is whole, so the start, the points and the time to 100 % are all whole numbers and only the rate is a decimal (types: start + point, rate + point, two points; `DECIMAL_THEMES`). `model-containers`: identical objects in a container, two scenarios give a system `V = w + n·v`; fields: container volume, object volume, number of objects. `model-consistency`: `choice` with 3 options (consistent / real value larger / real value smaller); about half the stories are consistent (two people's debts or savings after m periods, or a rate story with a claimed value). Themes live in `MODEL_THEMES` and `CONTAINERS`; texts in `TEXTS.model`.

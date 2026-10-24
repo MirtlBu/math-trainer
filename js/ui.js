@@ -37,6 +37,39 @@ const isChoiceKind = kind => kind === 'choice' || kind === 'multi';
 const answerCount = problem =>
   (problem && (problem.kind === 'intervals' || problem.kind === 'numbers')) ? problem.answer.length : 1;
 
+// ─── the set in progress (remembered in the browser) ──────────────────────────
+// The whole set (its 10 problems, typed answers, solved marks, open solutions, position) is saved
+// after every change, so a page reload brings the user back to the same problem.
+const SESSION_KEY = 'math-trainer-session';
+let inPractice = false;   // the practice screen is the one on view
+
+/** JSON cannot hold ±Infinity (open intervals): write them as markers */
+const saveReplacer = (k, v) => (v === Infinity ? { $inf: 1 } : v === -Infinity ? { $inf: -1 } : v);
+const saveReviver  = (k, v) => (v && typeof v === 'object' && '$inf' in v ? v.$inf * Infinity : v);
+
+function saveState() {
+  if (!session) return;
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      topic: currentTopic, subtopic: currentSubtopic, inPractice, session,
+    }, saveReplacer));
+  } catch (e) { /* storage blocked or full: the set simply is not remembered */ }
+}
+
+/** The saved set, or null when there is none or it does not look right */
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SESSION_KEY), saveReviver);
+    const s = saved && saved.session;
+    if (!s || !Array.isArray(s.items) || s.items.length !== SESSION_LENGTH) return null;
+    if (!s.items.every(it => it && it.problem && Array.isArray(it.inputs))) return null;
+    if (!(s.index >= 0 && s.index < SESSION_LENGTH)) return null;
+    return saved;
+  } catch (e) {
+    return null;
+  }
+}
+
 // ─── completed levels (remembered in the browser) ─────────────────────────────
 const COMPLETED_KEY = 'math-trainer-completed';
 
@@ -129,6 +162,8 @@ function showView(name) {
 }
 
 function goHome() {
+  inPractice = false;
+  saveState();
   showView('home');
   setBreadcrumb([{ label: TEXTS.nav.home, view: 'home' }]);
 }
@@ -136,6 +171,8 @@ function goHome() {
 /** Subtopic list of a topic ('equations' or 'expressions') */
 function goTopic(topic) {
   currentTopic = topic;
+  inPractice = false;
+  saveState();
   showView(topic);
   setBreadcrumb([
     { label: TEXTS.nav.home,  view: 'home' },
@@ -148,6 +185,7 @@ function goTopic(topic) {
 function goPractice(topic, subtopic, label) {
   currentTopic    = topic;
   currentSubtopic = subtopic;
+  inPractice      = true;
   showView('practice');
   setBreadcrumb([
     { label: TEXTS.nav.home,   view: 'home' },
@@ -308,6 +346,7 @@ function renderSessionComplete() {
 /** Show the end-of-set panel (all solved, or the user pressed "Finish set") */
 function finishSession() {
   session.finished = true;
+  saveState();
   renderSessionComplete();
   updateNav();
   sessionComplete.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -528,6 +567,7 @@ function showProblem() {
 
   renderProgress();
   updateNav();
+  saveState();
   if (!isChoiceKind(kind)) focusAnswer();
 }
 
@@ -645,6 +685,7 @@ function checkAnswer() {
     renderAnswerState(item);
     feedback.textContent = TEXTS.feedback.wrong;
     feedback.className   = 'feedback incorrect';
+    saveState();
     if (!isChoiceKind(item.problem.kind) && verdict.bad.length) inputEls()[verdict.bad[0]].select();
     return;
   }
@@ -662,6 +703,7 @@ function toggleSteps() {
   const item = currentItem();
   item.stepsOpen = !item.stepsOpen;
   applySteps();
+  saveState();
 }
 
 /** Show or hide the solution according to the current item's state */
@@ -772,6 +814,7 @@ answerInputs.addEventListener('input', e => {
     renderAnswerState(item);
     feedback.textContent = '';
     feedback.className   = 'feedback';
+    saveState();
     return;
   }
 
@@ -782,6 +825,7 @@ answerInputs.addEventListener('input', e => {
   e.target.classList.remove('incorrect');
   feedback.textContent = '';
   feedback.className   = 'feedback';
+  saveState();
 });
 
 // Enter: move to the next field, check on the last one, or go on to the next problem once solved
@@ -806,4 +850,16 @@ answerInputs.addEventListener('keydown', e => {
 // ─── init ─────────────────────────────────────────────────────────────────────
 addCheckIcons();
 renderCompleted();
-goHome();
+
+// bring back the set the user was working on before the page was reloaded
+const saved = loadState();
+const savedCard = saved && document.querySelector(`.subtopic-card[data-subtopic="${saved.subtopic}"]`);
+if (savedCard) {
+  session         = saved.session;
+  currentTopic    = saved.topic;
+  currentSubtopic = saved.subtopic;
+  if (saved.inPractice) goPractice(saved.topic, saved.subtopic, savedCard.querySelector('h3').textContent);
+  else                  goHome();
+} else {
+  goHome();
+}

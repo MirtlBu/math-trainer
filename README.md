@@ -1,4 +1,4 @@
-# Math Trainer
+# Two and Two-Thirds
 
 A personal project for myself to remember a school math, starting at simple equitations and getting harder more and more.
 

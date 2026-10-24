@@ -1,5 +1,5 @@
 /* ============================================================
-   Math Trainer styles.
+   Two and Two-Thirds styles.
    Everything is scoped under .math-trainer so the app can be
    embedded into a WordPress/Elementor page without leaking
    styles into the theme (or picking up too many from it).
@@ -146,11 +146,19 @@
 }
 
 .math-trainer .logo-mark {
-  /* the ± glyph sits on the baseline; lift it to line up with the middle of the text */
-  position: relative;
-  top: -2px;
-  left: 5px;
-  font-size: 1.1rem;
+  /* "2 2/3" drawn from plain digits: the ⅔ glyph is not in the font subsets */
+  margin-right: 4px;
+}
+
+.math-trainer .logo-frac {
+  font-size: 0.62em;
+  margin-left: 1px;
+}
+
+.math-trainer .logo-frac sup,
+.math-trainer .logo-frac sub {
+  font-size: 1em;
+  line-height: 0;
 }
 
 .math-trainer .breadcrumb {

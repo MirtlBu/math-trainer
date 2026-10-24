@@ -143,6 +143,32 @@ const TEXTS = {
     concludeNeither: 'Neither the ratio nor the product is constant, so $y$ is neither directly nor inversely proportional to $x$.',
   },
 
+  // ─── models from data ───────────────────────────────────────────────────────
+  model: {
+    askAll: 'Find the missing values.',
+    linear: (up) => `The quantity changes by the same amount every time unit, so it follows a linear model. Let $y_0$ be the starting value and $r$ the rate; it ${up ? 'grows' : 'shrinks'} by $r$ each time unit.`,
+    useKnownPoint: 'Put the known point into the model to find the rate $r$.',
+    solveRate: 'Solve for $r$.',
+    useKnownPointStart: 'Put the known point and the rate into the model to find the starting value $y_0$.',
+    solveStart: 'Solve for $y_0$.',
+    rateFromTwoPoints: 'The rate is the change in the quantity divided by the elapsed time.',
+    startFromPoint: 'Put one of the points into the model to find the starting value $y_0$.',
+    timeToTarget: (T) => `Find the time when the quantity reaches ${T}: put ${T} into the model.`,
+    solveTime: 'Solve for $t$.',
+    valueAtTime: (t) => `Put $t = ${t}$ into the model.`,
+    containerModel: (container, objects) => `The ${container} holds the water and the ${objects}: its volume $V$ equals the water plus the volume of the ${objects}.`,
+    containerSystem: (container, objects) => `Let $V$ be the volume of the ${container} and $w$ the volume of one object. The volume of the ${container} equals the water plus the ${objects}, which gives two equations:`,
+    subtractEquations: 'Subtract the second equation from the first: $V$ cancels.',
+    volumeFromOne: 'Put the volume of one object into one of the equations to find $V$.',
+    objectsForWater: (water) => `With ${water} litres of water, let $n$ be the number of objects.`,
+    solveCount: 'Solve for $n$.',
+    differenceDebt: 'Their debts shrink by different amounts every month, so the difference between the debts changes by the difference of the payments each month.',
+    differenceSavings: 'They save different amounts every month, so the difference between their savings changes by the difference of the deposits each month.',
+    calculateReal: 'Calculate what the difference should be after that time.',
+    matches: (stated) => `This matches the stated ${stated}, so the information is consistent.`,
+    contradicts: (real, stated) => `The rates give ${real}, but the story says ${stated}: the information contradicts itself.`,
+  },
+
   // ─── word problems ──────────────────────────────────────────────────────────
   words: {
     orderHint: 'One answer per field, in the order of the labels.',
