@@ -11,7 +11,6 @@
 // ─── state ────────────────────────────────────────────────────────────────────
 let currentTopic    = null;   // 'equations' | 'expressions'
 let currentSubtopic = null;
-let shownKind       = null;   // 'solve' | 'simplify': what the practice screen is set up for
 
 /**
  * {
@@ -92,11 +91,12 @@ const views = {
   inequalities: document.getElementById('view-inequalities'),
   graphs:    document.getElementById('view-graphs'),
   numbers:   document.getElementById('view-numbers'),
+  words:     document.getElementById('view-words'),
   practice:  document.getElementById('view-practice'),
 };
 
 const breadcrumb      = document.getElementById('breadcrumb');
-const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs', 'numbers'];   // views that list subtopic cards
+const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs', 'numbers', 'words'];   // views that list subtopic cards
 
 const problemText     = document.getElementById('problem-text');
 const problemGraph    = document.getElementById('problem-graph');
@@ -324,10 +324,7 @@ function updateNav() {
 
 // ─── problem lifecycle ────────────────────────────────────────────────────────
 /** The hint under the answer fields depends on the answer type */
-function setupForKind(kind) {
-  if (kind === shownKind) return;
-  shownKind = kind;
-
+function setupForKind(kind, problem) {
   const hints = {
     radicals:  TEXTS.practice.radicalHint,
     numbers:   TEXTS.practice.numbersHint,
@@ -335,8 +332,9 @@ function setupForKind(kind) {
     multi:     TEXTS.practice.multiHint,
     fraction:  TEXTS.practice.fractionHint,
   };
-  answerHint.textContent   = hints[kind] || '';
-  answerHint.style.display = hints[kind] ? '' : 'none';
+  const hint = (problem && problem.hint) || hints[kind];   // a problem can bring its own hint
+  answerHint.textContent   = hint || '';
+  answerHint.style.display = hint ? '' : 'none';
 }
 
 /** Inline formula that waits for KaTeX if it is not loaded yet */
@@ -352,8 +350,8 @@ function renderInline(el, latex, tries = 0) {
 let inputsBuiltFor = null;
 
 /** Create the answer fields (placeholder and keyboard depend on the answer type) */
-function buildInputs(kind, count) {
-  const key = `${kind}:${count}`;
+function buildInputs(kind, count, labels) {
+  const key = `${kind}:${count}:${labels ? labels.join('|') : ''}`;
   if (key === inputsBuiltFor) return;
   inputsBuiltFor = key;
 
@@ -373,7 +371,12 @@ function buildInputs(kind, count) {
     const field = document.createElement('div');
     field.className = 'answer-field';
 
-    if (numeric) {
+    if (labels) {                       // named fields: "1st part (cm)", "Width"…
+      const label = document.createElement('span');
+      label.className   = 'answer-label';
+      label.textContent = labels[i];
+      field.appendChild(label);
+    } else if (numeric) {
       const prefix = document.createElement('span');
       prefix.className = 'answer-prefix';
       renderInline(prefix, 'x =');
@@ -500,9 +503,9 @@ function showProblem() {
   if (problem.graph) renderGraph(problemGraph, problem.graph);
   else               problemGraph.innerHTML = '';
 
-  setupForKind(kind);
+  setupForKind(kind, problem);
   if (isChoiceKind(kind)) buildChoices(problem);
-  else                   buildInputs(kind, answerCount(problem));
+  else                   buildInputs(kind, answerCount(problem), problem.labels);
   answerRow.classList.toggle('choice', isChoiceKind(kind));
 
   renderAnswerState(item);
@@ -588,7 +591,10 @@ function judgeAnswer(rawInputs, problem) {
     const parsed = rawInputs.map(parseNumber);
     if (parsed.some(p => p.error)) return { status: 'hint', message: TEXTS.feedback.notANumber };
 
-    const bad = unmatchedNumbers(parsed.map(p => p.value), problem.answer);
+    // ordered answers (the fields are named) are compared field by field, otherwise as a set
+    const bad = problem.ordered
+      ? parsed.map((p, i) => (Math.abs(p.value - problem.answer[i]) < 1e-9 ? -1 : i)).filter(i => i >= 0)
+      : unmatchedNumbers(parsed.map(p => p.value), problem.answer);
     return bad.length ? { status: 'wrong', bad } : { status: 'correct' };
   }
 

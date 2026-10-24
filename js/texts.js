@@ -15,6 +15,7 @@ const TEXTS = {
     inequalities: 'Inequalities',
     graphs: 'Functions & Graphs',
     numbers: 'Numbers',
+    words: 'Word Problems',
   },
 
   // ─── practice screen ────────────────────────────────────────────────────────
@@ -106,6 +107,68 @@ const TEXTS = {
     solveForX: 'Solve for $x$ and reduce the fraction.',
   },
 
+  // ─── equations with fractions ───────────────────────────────────────────────
+  fractions: {
+    original: 'Write the original equation.',
+    lcd: (dens, m) => `The denominators are ${dens.length > 1 ? dens.slice(0, -1).join(', ') + ' and ' + dens[dens.length - 1] : dens[0]}. Their lowest common multiple is ${m}: this is the lowest common denominator (LCD).`,
+    multiplyAll: (m) => `Multiply every term on both sides by ${m}, so that the fractions disappear.`,
+    cancel: 'Cancel the denominators.',
+    expand: 'Multiply out the brackets.',
+    collect: 'Move the terms with $x$ to the left side and the numbers to the right side, and combine.',
+    domain: 'The denominators cannot be zero, so some values of $x$ are not allowed:',
+    multiplyByDenominators: 'Multiply both sides by both denominators (cross-multiply) and cancel.',
+    lcdWithX: (e) => `The common denominator is $${e}$. Multiply every term on both sides by it.`,
+    multiplyByX: 'Multiply every term on both sides by $x$.',
+    checkDomain: 'This value is allowed (the denominators are not zero), so it is the solution.',
+    bothAllowed: 'Neither solution is $0$, so both are allowed.',
+  },
+
+  // ─── proportionality ────────────────────────────────────────────────────────
+  proportion: {
+    directConstant: 'The two quantities are directly proportional, so their ratio is constant: the constant of proportionality $k$.',
+    multiplyByK: 'Multiply the new amount by $k$.',
+    directPower: (n) => `The quantity is directly proportional to the ${n === 2 ? 'square' : 'cube'} of the other one, so the ratio of the new value to the old value equals the ${n === 2 ? 'square' : 'cube'} of the ratio of the other quantity.`,
+    inversePower: (n) => `The quantity is inversely proportional to the square of the other one, so the ratio of the new value to the old value equals the square of the inverted ratio of the other quantity (old over new).`,
+    reduceRatio: 'Write the ratio of the $x$ values in lowest terms.',
+    solveForSecond: 'Substitute the known values and calculate.',
+    inverseConstant: 'The quantities are inversely proportional, so their product is constant.',
+    sameProduct: 'The product is the same for the new values.',
+    kFromRatio: 'For direct proportion $k = \\dfrac{y}{x}$.',
+    kFromProduct: 'For inverse proportion $k = x \\cdot y$.',
+    checkOthers: 'Check with another pair of values: it gives the same number.',
+    testRatio: 'Direct proportion: the ratio $\\dfrac{y}{x}$ is the same for every pair.',
+    testProduct: 'Inverse proportion: the product $x \\cdot y$ is the same for every pair.',
+    concludeDirect: 'The ratio $\\dfrac{y}{x}$ is constant, so $y$ is directly proportional to $x$.',
+    concludeInverse: 'The product $x \\cdot y$ is constant, so $y$ is inversely proportional to $x$.',
+    concludeNeither: 'Neither the ratio nor the product is constant, so $y$ is neither directly nor inversely proportional to $x$.',
+  },
+
+  // ─── word problems ──────────────────────────────────────────────────────────
+  words: {
+    orderHint: 'One answer per field, in the order of the labels.',
+    letFirst: (which, d, more) => `Let $x$ be the first one (the ${which}). Each next one is ${d} ${more ? 'more' : 'less'}, so they are:`,
+    letSmallest: (name, step) => `Let $x$ be the smallest number. Consecutive ${name} differ by ${step}, so they are:`,
+    letSmaller: (diff) => `Let $x$ be the smaller number. The larger number is ${diff} more, so the numbers are:`,
+    letSmallerTimes: (k) => `Let $x$ be the smaller number. The other number is ${k} times as large, so the numbers are:`,
+    letWidth: (k) => `Let $x$ be the width. The length is ${k} more, so the sides are:`,
+    letWidthTimes: (m) => `Let $x$ be the width. The length is ${m} times the width, so the sides are:`,
+    letFirstSide: 'Let $x$ be the first side. The other sides are longer by the given amounts, so the sides are:',
+    letEqualSide: (k) => `Let $x$ be the length of an equal side. The base is ${k} cm shorter, so the sides are:`,
+    total: 'Together they add up to the total.',
+    perimeterRectangle: 'The perimeter of a rectangle is twice the sum of its width and its length.',
+    perimeterTriangle: 'The perimeter is the sum of the three sides.',
+    areaRectangle: 'The area of a rectangle is its width times its length.',
+    productEquation: 'The product of the two numbers is given.',
+    simplifyBrackets: 'Simplify inside the brackets.',
+    expandBrackets: 'Multiply out the brackets.',
+    expandAndMove: 'Multiply out the brackets and move everything to the left side.',
+    rejectNegative: 'A width cannot be negative, so only the positive solution fits the problem.',
+    rejectNegativeInteger: 'The integers are positive, so only the positive solution fits the problem. The next integer is $x + 1$:',
+    widthLength: 'So the width and the length are:',
+    equalSideAndBase: 'So an equal side and the base are:',
+    answerIs: 'So the answer is:',
+  },
+
   // ─── solution steps (equations.js) ──────────────────────────────────────────
   solution: {
     original: 'Write the original equation.',
@@ -163,6 +226,7 @@ const TEXTS = {
     factorQuadratic: 'Write the quadratic in factored form.',
     discriminant: 'Calculate the discriminant $D = b^2 - 4ac$.',
     quadraticFormula: 'Use the quadratic formula.',
+    twoSolutions: 'Calculate the two solutions.',
     sqrtBoth: 'Take the square root of both sides: there are two solutions, one positive and one negative.',
     factorCommon: 'Factor out the common factor.',
     factorOutX: 'Factor out $x$.',

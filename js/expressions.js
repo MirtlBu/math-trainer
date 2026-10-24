@@ -21,108 +21,112 @@ function binomial(a, b) {
   return `${coefX(a)} ${b > 0 ? '+' : '-'} ${Math.abs(b)}`;
 }
 
+// ─── building blocks ──────────────────────────────────────────────────────────
+
+/**
+ * A bracket with an x term and a number, written either as (bx + c) or as (c + bx).
+ * Returns the text inside the brackets and its two terms in the order they are written:
+ * each term is { text, coef, deg } (deg 1 for the x term, 0 for the number).
+ */
+function randomBracket(b, c) {
+  const constFirst = randInt(1, 2) === 1;
+  const xTerm = { text: coefX(b), coef: b, deg: 1 };
+  const cTerm = { text: `${c}`,   coef: c, deg: 0 };
+  const text  = constFirst
+    ? `${c} ${b > 0 ? '+' : '-'} ${Math.abs(b) === 1 ? 'x' : `${Math.abs(b)}x`}`
+    : binomial(b, c);
+  return { text, terms: constFirst ? [cTerm, xTerm] : [xTerm, cTerm] };
+}
+
+/**
+ * Multiply every term of `left` by every term of `right` (in that order).
+ * Returns the product terms (not yet combined), the same as a LaTeX list "a · b + a · c + …",
+ * and the combined result as a polynomial { degree: coefficient }.
+ */
+function expandTerms(left, right) {
+  const products = [];
+  const factors  = [];
+  left.forEach(l => right.forEach(r => {
+    products.push({ coef: l.coef * r.coef, deg: l.deg + r.deg });
+    factors.push(`${wrapNeg(l.text)} \\cdot ${wrapNeg(r.text)}`);
+  }));
+
+  const answer = {};
+  products.forEach(t => { answer[t.deg] = (answer[t.deg] || 0) + t.coef; });
+  return { products, factors: factors.join(' + '), answer };
+}
+
+/** A factor in front of or behind a bracket: k·(…) or (…)·k, with the bracket's terms */
+function factorWithBracket(multiplier, bracket) {
+  const onRight = randInt(1, 2) === 1;                     // (…) · k instead of k · (…)
+  const latex = onRight
+    ? `(${bracket.text}) \\cdot ${wrapNeg(multiplier.text)}`          // a negative factor after the dot gets brackets
+    : `${multiplier.text} \\cdot (${bracket.text})`;
+  const { factors, answer } = onRight
+    ? expandTerms(bracket.terms, [multiplier])
+    : expandTerms([multiplier], bracket.terms);
+  return { latex, factors, answer };
+}
+
 // ─── generators ───────────────────────────────────────────────────────────────
 
-/** number · (bx + c)   e.g. 4 · (3x − 2) = 12x − 8 */
+/** number · (bx + c), also (c + bx) and with the number behind: 4 · (3x − 2) = 12x − 8 */
 function generateExpandNumber() {
   const k = randCoef(9);
-  const b = randNZ(9);
-  const c = randNZ(9);
-
-  const latex  = `${k} \\cdot (${binomial(b, c)})`;
-  const answer = { 1: k * b, 0: k * c };
+  const { latex, factors, answer } = factorWithBracket(
+    { text: `${k}`, coef: k, deg: 0 },
+    randomBracket(randNZ(9), randNZ(9))
+  );
 
   return {
     kind: 'simplify',
     latex,
     answer,
     steps: [
-      {
-        explanation: TEXTS.solution.originalExpression,
-        math: latex
-      },
-      {
-        explanation: TEXTS.solution.distribute,
-        math: `${wrapNeg(`${k}`)} \\cdot ${wrapNeg(coefX(b))} + ${wrapNeg(`${k}`)} \\cdot ${wrapNeg(`${c}`)}`
-      },
-      {
-        explanation: TEXTS.solution.simplify,
-        math: polyToLatex(answer)
-      }
+      { explanation: TEXTS.solution.originalExpression, math: latex },
+      { explanation: TEXTS.solution.distribute,         math: factors },
+      { explanation: TEXTS.solution.simplify,           math: polyToLatex(answer) },
     ]
   };
 }
 
-/** kx · (bx + c)   e.g. 4x · (3x − 2) = 12x² − 8x */
+/** kx · (bx + c), also (c + bx) and with kx behind: 4x · (3x − 2) = 12x² − 8x */
 function generateExpandMonomial() {
   const k = randCoef(6);
-  const b = randNZ(6);
-  const c = randNZ(9);
-
-  const latex  = `${coefX(k)} \\cdot (${binomial(b, c)})`;
-  const answer = { 2: k * b, 1: k * c };
+  const { latex, factors, answer } = factorWithBracket(
+    { text: coefX(k), coef: k, deg: 1 },
+    randomBracket(randNZ(6), randNZ(9))
+  );
 
   return {
     kind: 'simplify',
     latex,
     answer,
     steps: [
-      {
-        explanation: TEXTS.solution.originalExpression,
-        math: latex
-      },
-      {
-        explanation: TEXTS.solution.distribute,
-        math: `${wrapNeg(coefX(k))} \\cdot ${wrapNeg(coefX(b))} + ${wrapNeg(coefX(k))} \\cdot ${wrapNeg(`${c}`)}`
-      },
-      {
-        explanation: TEXTS.solution.multiplyPowers,
-        math: polyToLatex(answer)
-      }
+      { explanation: TEXTS.solution.originalExpression, math: latex },
+      { explanation: TEXTS.solution.distribute,         math: factors },
+      { explanation: TEXTS.solution.multiplyPowers,     math: polyToLatex(answer) },
     ]
   };
 }
 
-/** (ax + b) · (cx + d)   e.g. (4x − 2)(3x + 2) = 12x² + 8x − 6x − 4 = 12x² + 2x − 4 */
+/** (ax + b)(cx + d), each bracket also as (b + ax) / (d + cx): (4x − 2)(3x + 2) = 12x² + 2x − 4 */
 function generateExpandBinomials() {
-  const a = randNZ(5);
-  const b = randNZ(9);
-  const c = randNZ(5);
-  const d = randNZ(9);
+  const first  = randomBracket(randNZ(5), randNZ(9));
+  const second = randomBracket(randNZ(5), randNZ(9));
 
-  const latex  = `(${binomial(a, b)}) \\cdot (${binomial(c, d)})`;
-  const answer = { 2: a * c, 1: a * d + b * c, 0: b * d };
-
-  // the four products, in the order first·first, first·second, second·first, second·second
-  const A = coefX(a), B = `${b}`, C = coefX(c), D = `${d}`;
-  const products = termsLatex([
-    { coef: a * c, deg: 2 },
-    { coef: a * d, deg: 1 },
-    { coef: b * c, deg: 1 },
-    { coef: b * d, deg: 0 },
-  ]);
+  const latex = `(${first.text}) \\cdot (${second.text})`;
+  const { products, factors, answer } = expandTerms(first.terms, second.terms);
 
   return {
     kind: 'simplify',
     latex,
     answer,
     steps: [
-      {
-        explanation: TEXTS.solution.originalExpression,
-        math: latex
-      },
-      {
-        explanation: TEXTS.solution.distributeAll,
-        math: `${wrapNeg(A)} \\cdot ${wrapNeg(C)} + ${wrapNeg(A)} \\cdot ${wrapNeg(D)} + ${wrapNeg(B)} \\cdot ${wrapNeg(C)} + ${wrapNeg(B)} \\cdot ${wrapNeg(D)}`
-      },
-      {
-        explanation: TEXTS.solution.multiplyOut,
-        math: products
-      },
-      {
-        explanation: TEXTS.solution.combineLike,
-        math: polyToLatex(answer)
-      }
+      { explanation: TEXTS.solution.originalExpression, math: latex },
+      { explanation: TEXTS.solution.distributeAll,      math: factors },
+      { explanation: TEXTS.solution.multiplyOut,        math: termsLatex(products) },
+      { explanation: TEXTS.solution.combineLike,        math: polyToLatex(answer) },
     ]
   };
 }

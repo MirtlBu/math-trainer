@@ -24,25 +24,29 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/graph-problems.js` | Word-problem generators on a linear graph or equation, built from those stories. |
 | `js/compare-problems.js` | Two characters with two linear equations (`D = 6t + 10`, `E = 3t + 20`): own stories + the generator. |
 | `js/number-problems.js` | Number sets (lukujoukot) and decimals ↔ fractions: the numbers, the sets they belong to, the generators. |
+| `js/word-problems.js` | Word problems (sanalliset tehtävät): parts of a whole, consecutive numbers, perimeter, quadratic area/product problems. |
+| `js/fraction-equations.js` | Equations with fractions: clear them by multiplying every term by the lowest common denominator. |
+| `js/proportion-problems.js` | Direct and inverse proportionality (suoraan / kääntäen verrannollisuus), incl. squares, cubes and tables. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
 | `js/ui.js` | Everything that touches the page: routing, session, checking, rendering. |
 | `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → inequalities → ui → embed`.
+`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → proportion-problems → inequalities → ui → embed`.
 `expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`.
 
 ## Content model
 
-Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`, `numbers`). Each topic has a view in `index.html` with `.subtopic-card` elements; the card's `data-subtopic` is the key into `GENERATORS`.
+Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`, `numbers`, `words`). Each topic has a view in `index.html` with `.subtopic-card` elements; the card's `data-subtopic` is the key into `GENERATORS`.
 
 | Topic | Level keys |
 |---|---|
-| equations | `linear-basic`, `linear-twoStep`, `linear-bothSides`, `quad-factored`, `quad-incomplete`, `quad-general`, `cubic`, `quartic` |
+| equations | `linear-basic`, `linear-twoStep`, `linear-bothSides`, `frac-simple`, `frac-linear`, `quad-factored`, `quad-incomplete`, `quad-general`, `cubic`, `quartic`, `frac-rational` |
 | expressions | `expand-number`, `expand-monomial`, `expand-binomials`, `radical-simplify`, `radical-addsub`, `radical-muldiv`, `radical-expand`, `radical-rationalize` |
 | inequalities | `ineq-linear`, `ineq-product`, `ineq-quadratic`, `ineq-cubic`, `ineq-quartic` |
 | graphs | `graph-value`, `func-equation`, `func-compare`, `graph-interpret` |
 | numbers | `numset-sets`, `numdec-fractions` |
+| words | `word-parts`, `word-consecutive`, `word-geometry`, `word-quadratic`, `prop-direct`, `prop-inverse`, `prop-identify` |
 
 Home also has disabled placeholders (Functions & Graphs, Geometry).
 
@@ -65,7 +69,7 @@ Home also has disabled placeholders (Functions & Graphs, Geometry).
 |---|---|---|---|
 | `solve` | one number | 1 (with "x =") | `5`, `-3`, `2.5`, `2,5`, `3/2` |
 | `radicals` | `{radicand: coef}` | 1 | `3√6 - 2`, `3*sqrt(6)`, `√6`; every root fully simplified (`√54` is rejected), each root and the plain numbers once |
-| `numbers` | array of numbers (a set of roots) | one per root (each with "x =") | same as above, any order |
+| `numbers` | array of numbers (a set of roots) | one per root (each with "x =") | same as above, any order. With `ordered: true` and `labels: [...]` the fields are named ("1st part (cm)", "Width") and each field is checked against the answer at its position |
 | `simplify` | polynomial `{degree: coef}` | 1 | `12x^2+2x-4`, `12x²+2x−4`, `2*x`; no brackets, each power once |
 | `value` | one number | 1 (no "x =") | like `solve`; used for numbers read from a graph |
 | `multi` | array of indices of the right options (`options: [text]`) | checkboxes ("select all that apply") | any combination; a wrong tick is highlighted, missing ones are not revealed |
@@ -80,7 +84,7 @@ Number of fields = `answerCount(problem)` in `ui.js` (answer length for `numbers
 ### Polynomial builders (`polynomial-equations.js`)
 
 A builder describes one polynomial with integer roots and the steps that find them:
-`{ expr, leadPositive, roots, steps, note? }`. Builders: `polyQuadratic`, `polyCubicFactorX` (x(x−p)(x−q)), `polyCubicGrouping` ((x−r)(x²−k²) by grouping), `polyQuarticBiquadratic` (t = x²), `polyQuarticDifference` (x⁴ − k⁴). `quadraticSolveSteps` is the shared "solve ax²+bx+c=0" explanation: Vieta when a = 1, discriminant otherwise.
+`{ expr, leadPositive, roots, steps, note? }`. Builders: `polyQuadratic`, `polyCubicFactorX` (x(x−p)(x−q)), `polyCubicGrouping` ((x−r)(x²−k²) by grouping), `polyQuarticBiquadratic` (t = x²), `polyQuarticDifference` (x⁴ − k⁴). `quadraticSolveSteps(a, b, c, roots, variable, discriminant)` is the shared "solve ax²+bx+c=0" explanation: Vieta when a = 1, discriminant otherwise (or always, with the last argument `true`: the word problems use it); the discriminant version ends with "calculate the two solutions".
 
 - **Equations** = `expr = 0` + builder steps; answer = `roots`.
 - **Inequalities** = `expr ⟨sign⟩ 0` + "find where it equals zero" + builder steps + sign table (`signAnalysis`) + chosen intervals.
@@ -144,6 +148,18 @@ A problem may carry `graph`: `{ x:{min,max,step,label}, y:{…}, lines:[{fn}], c
 **No story appears in two levels:** the stories are dealt to the levels in turn (`value`, `equation`, `interpret`, by their position in the list, so append new stories at the END), and `pickContext(level)` chooses only among its level's stories, never repeating within the last 9 problems (a set of 10 shows 10 different stories). `func-compare` has its own stories with themes that do not occur in the others. To add a story, add an entry with all the fields the others have (graph wording, equation wording, question texts, meanings). `pickLine` chooses start `b`, rate `p/q` per unit and the grid so that the start value lies on a horizontal grid line and the line passes through a grid crossing again, so values can be read exactly. `func-equation` is the same stories but with an equation instead of a graph (`S = 5w + 45`, shown as display math inside `text`): change over a period (units shown cancelling), value at a time, time to reach a value, the start, or a multiple-choice "what does this number mean" (`a ≠ b` is enforced so it is unambiguous; shrinking quantities never change by more than they hold). `func-compare` (in `compare-problems.js`, with its own 9 two-character stories) shows two equations in one display (`aligned`): when are they equal, the common value, how much more one has at time t, the difference of the rates or of the starts. The lines are built backwards from a meeting time t* (whole number) and a common value v*, so the answers are whole numbers; a story never repeats within the last 8 problems. `graph-value` asks for a value at a time, a time for a value, the start or the rate; `graph-interpret` is a `choice` problem of three kinds: the true statement among four (the right start and rate plus wrong starts / inverted or changed rates), which equation matches the graph (wrong signs, swapped start and rate, inverse rate, negative start), or which ordered pair is where the line crosses the vertical axis.
 
 For `choice` problems the answer area shows a radio list instead of text inputs (`buildChoices`, `renderAnswerState`, `readInputs` in `ui.js`); a wrong option is highlighted amber, the right one green.
+
+### Proportionality
+
+`proportion-problems.js`: the numbers are built so that every answer is exact (at most two decimals). `prop-direct`: y ∝ x (cheese price, pay, petrol, map scale, pancakes, cycling: solved with the constant k), and y ∝ x² or x³ (braking distance, free fall, pizza price by diameter, mass of a metal cube: the ratio method `y₂/y₁ = (x₂/x₁)ⁿ`; the ratio of the x values is chosen as a coprime p : q, so y₁ = qⁿ·u and y₂ = pⁿ·u are both exact). `prop-inverse`: x·y constant (workers and days, speed and time, pumps, supplies) and y ∝ 1/x² (light intensity, signal strength). `prop-identify`: a LaTeX table; decide direct / inverse / neither (`choice`; "neither" is y = ax + b or y = x²), or type the constant k. Stories do not repeat within the last 3 problems of a level.
+
+### Equations with fractions
+
+`fraction-equations.js` represents a side as a list of terms `s·(a·x + b)/den` and builds the explanation from them (`fractionSolutionSteps`): the denominators and their lowest common multiple, "multiply every term on both sides by it", cancel (`6x + 4x = 60`, or `4(x + 1) = 3(x − 2)`), multiply out the brackets when there are any, collect the x terms, divide. The solution (an integer x*) is chosen first and the equation is built around it, so the answer is always a whole number. `frac-simple`: `x/a + x/b = c`, `x/a ± p = q`, `kx/a = c`, three fractions, `x/a − x/b = c`. `frac-linear`: `(x + p)/a = (x + q)/b`, a sum or difference of bracket fractions, x on both sides, `kx/a − mx/b = c`, fraction constants (`x/a + p/b = c/d`). A candidate is **rejected and regenerated** (`fractionProblem` returns null, `untilValid` retries) when the x terms cancel completely (an identity, not an equation) and when a numerator would reduce (`5x/5`); negative numbers are written as subtracted positives (no `− −3`). `frac-rational` has x in a denominator and always states the excluded values first: `a/x = b/(x + c)` (cross-multiply), `a/x + b/c = d/x`, and `x + a/x = b` (a quadratic with two roots, solved with `quadraticSolveSteps`); it ends by checking the solution against the excluded values.
+
+### Word problems
+
+`word-problems.js` builds a story, an equation and the steps from a hidden whole-number solution, so every answer is a whole number. The answers are `numbers` with `ordered: true` and named `labels`; the unknown `x` is always the first answer, and each problem also carries `equation` (LaTeX) and `meta` for checking, plus its own `hint` ("one answer per field, in the order of the labels"). `word-parts`: a total split into 3–6 parts that change by a constant step (rope, ribbon, plank, ski stages, prize money, monthly savings, pages read per day; larger or smaller each time); `word-consecutive`: consecutive integers / even / odd numbers with a given sum, or two numbers with a given sum and difference or ratio; `word-geometry`: perimeter of a rectangle (width + k, or m times the width) or of a triangle (sides x, x+a, x+b; or isosceles); `word-quadratic`: area of a rectangle with length = width + k and the product of two consecutive integers, solved with the shared `quadraticSolveSteps`, where the negative root is explicitly rejected. The linear levels share `sumSteps` (combine like terms, undo the constant, divide).
 
 ### Number problems
 

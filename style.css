@@ -617,6 +617,11 @@
   border-bottom: 0;
 }
 
+.math-trainer .answer-label {
+  flex: 0 0 8.5em;          /* named fields line up: "1st part (cm)", "Width"… */
+  color: var(--clr-muted);
+}
+
 .math-trainer .answer-prefix {
   font-size: 1.1rem;
   white-space: nowrap;

@@ -66,11 +66,11 @@ const uniqueAscending = list => [...new Set(list)].sort((p, q) => p - q);
  * Otherwise: discriminant and the quadratic formula.
  * The list of roots is NOT included; callers add it (v = variable name).
  */
-function quadraticSolveSteps(a, b, c, roots, v = 'x') {
+function quadraticSolveSteps(a, b, c, roots, v = 'x', discriminant = false) {
   const [p, q] = roots;
   const steps = [];
 
-  if (a === 1) {
+  if (a === 1 && !discriminant) {
     steps.push({
       explanation: TEXTS.solution.vieta(-b, c),
       math: `${numP(p)} + ${numP(q)} = ${-b}, \\quad ${numP(p)} \\cdot ${numP(q)} = ${c}`
@@ -94,6 +94,13 @@ function quadraticSolveSteps(a, b, c, roots, v = 'x') {
         ? `${v} = \\dfrac{-b}{2a} = \\dfrac{${-b}}{${2 * a}}`
         : `${v} = \\dfrac{-b \\pm \\sqrt{D}}{2a} = \\dfrac{${-b} \\pm ${sqrtD}}{${2 * a}}`
     });
+    if (D !== 0) {                                              // work out both solutions
+      steps.push({
+        explanation: TEXTS.solution.twoSolutions,
+        math: `${v}_1 = \\dfrac{${-b} - ${sqrtD}}{${2 * a}} = ${(-b - sqrtD) / (2 * a)}, \\quad ` +
+              `${v}_2 = \\dfrac{${-b} + ${sqrtD}}{${2 * a}} = ${(-b + sqrtD) / (2 * a)}`
+      });
+    }
   }
   return steps;
 }
