@@ -800,6 +800,7 @@ btnNext.addEventListener('click',  () => {
   else finishSession();
 });
 btnSteps.addEventListener('click', toggleSteps);
+document.getElementById('logo').addEventListener('click', goHome);
 btnRepeat.addEventListener('click', startSession);
 
 // Remember what is typed and clear the "wrong" state of a field as soon as it is edited

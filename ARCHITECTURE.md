@@ -27,13 +27,14 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/word-problems.js` | Word problems (sanalliset tehtävät): parts of a whole, consecutive numbers, perimeter, quadratic area/product problems. |
 | `js/fraction-equations.js` | Equations with fractions: clear them by multiplying every term by the lowest common denominator. |
 | `js/proportion-problems.js` | Direct and inverse proportionality (suoraan / kääntäen verrannollisuus), incl. squares, cubes and tables. |
+| `js/system-problems.js` | Word problems with two unknowns (two kinds of items, a system of two linear equations). |
 | `js/model-problems.js` | Linear-model word problems: model from data, containers with identical objects, consistency of information. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
 | `js/ui.js` | Everything that touches the page: routing, session, checking, rendering. |
 | `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → proportion-problems → model-problems → inequalities → ui → embed`.
+`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → proportion-problems → system-problems → model-problems → inequalities → ui → embed`.
 `expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`.
 
 ## Content model
@@ -47,7 +48,7 @@ Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`,
 | inequalities | `ineq-linear`, `ineq-product`, `ineq-quadratic`, `ineq-cubic`, `ineq-quartic` |
 | graphs | `graph-value`, `func-equation`, `func-compare`, `graph-interpret` |
 | numbers | `numset-sets`, `numdec-fractions` |
-| words | `word-parts`, `word-consecutive`, `word-geometry`, `word-quadratic`, `model-data`, `model-decimal`, `model-containers`, `model-consistency`, `prop-direct`, `prop-inverse`, `prop-identify` |
+| words | `word-parts`, `word-consecutive`, `word-geometry`, `word-quadratic`, `word-system`, `model-data`, `model-decimal`, `model-containers`, `model-consistency`, `prop-direct`, `prop-inverse`, `prop-identify` |
 
 Home also has disabled placeholders (Functions & Graphs, Geometry).
 
@@ -213,3 +214,7 @@ There is no test suite in the repo. While building, generators were verified by 
 ### Model problems
 
 `model-problems.js`: all numbers are chosen so that every answer is a whole number. `model-data` (Linear Model from Data): a quantity changes at a constant rate (debt, flash drive, savings, printer, pool, battery, car, draining tank). Types: start value + one point, rate + one point, two points. Several labelled answer fields (`kind: 'numbers'`, `ordered: true`, `labels`), e.g. rate, start, value or time. `model-decimal` (Charging and Decimal Rates): a battery is charged / a file downloaded to 100 % at a decimal rate (0.5 … 3.5 per time unit); times are multiples of the smallest m for which r·m is whole, so the start, the points and the time to 100 % are all whole numbers and only the rate is a decimal (types: start + point, rate + point, two points; `DECIMAL_THEMES`). `model-containers`: identical objects in a container, two scenarios give a system `V = w + n·v`; fields: container volume, object volume, number of objects. `model-consistency`: `choice` with 3 options (consistent / real value larger / real value smaller); about half the stories are consistent (two people's debts or savings after m periods, or a rate story with a claimed value). Themes live in `MODEL_THEMES` and `CONTAINERS`; texts in `TEXTS.model`.
+
+### System problems
+
+`system-problems.js`, level `word-system` (Two Kinds of Items): n items of two kinds with the values a and b are worth S together (bills, coins, notebooks and pads, tickets, bicycles and cars by wheels, hens and rabbits by legs, 2- and 3-point baskets, bicycles and tricycles). The numbers x and y (both ≥ 3, x ≠ y) are chosen first, then S = a·x + b·y, so the system `x + y = n, ax + by = S` has exactly one solution and the answers are whole numbers. The solution writes the system (`\begin{cases}`), expresses y = n − x, substitutes, multiplies out the bracket, combines like terms, solves for x, then finds y. Stories live in `SYSTEM_THEMES` (`pairs` of values, `n` range, `text`, `question`, `labels`); texts in `TEXTS.system`. Note: global names must not clash with other files (`coefX` is already in equations.js, so the helper here is `sysCoefX`).

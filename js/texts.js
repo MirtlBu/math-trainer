@@ -143,6 +143,14 @@ const TEXTS = {
     concludeNeither: 'Neither the ratio nor the product is constant, so $y$ is neither directly nor inversely proportional to $x$.',
   },
 
+  // ─── systems of equations (two kinds of items) ──────────────────────────────
+  system: {
+    setup: 'Let $x$ be the number of the first kind and $y$ the number of the second kind. The total number of items and the total value give two equations:',
+    expressY: 'From the first equation express $y$.',
+    substitute: 'Substitute $y$ into the second equation: now there is only one unknown.',
+    findY: 'Find $y$ from $y = $ (total) $- x$.',
+  },
+
   // ─── models from data ───────────────────────────────────────────────────────
   model: {
     askAll: 'Find the missing values.',
