@@ -143,6 +143,21 @@ const TEXTS = {
     concludeNeither: 'Neither the ratio nor the product is constant, so $y$ is neither directly nor inversely proportional to $x$.',
   },
 
+  // ─── systems of two linear equations (systems.js) ───────────────────────────
+  linsys: {
+    question: 'Solve the system of equations.',
+    substituteInto: (q) => `The first equation already gives $${q}$. Substitute it into the second equation.`,
+    findOther: (p, q) => `Put $${p}$ into the first equation to find $${q}$.`,
+    multiplyBoth: (m1, m2, v) => {
+      const which = m1 !== 1 && m2 !== 1 ? `Multiply the first equation by ${m1} and the second by ${m2}` : m1 !== 1 ? `Multiply the first equation by ${m1}` : `Multiply the second equation by ${m2}`;
+      return `${which}, so that the coefficients of $${v}$ are equal in size.`;
+    },
+    addEq: (v) => `The coefficients of $${v}$ are opposite numbers: add the two equations and $${v}$ cancels.`,
+    subtractEq: (v) => `The coefficients of $${v}$ are equal: subtract the second equation from the first and $${v}$ cancels.`,
+    backSub: (w, w0) => `Put $${w} = ${w0}$ into the first original equation.`,
+    moveNumber: 'Calculate and move the number to the right side.',
+  },
+
   // ─── systems of equations (two kinds of items) ──────────────────────────────
   system: {
     setup: 'Let $x$ be the number of the first kind and $y$ the number of the second kind. The total number of items and the total value give two equations:',

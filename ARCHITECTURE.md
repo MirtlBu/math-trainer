@@ -27,6 +27,7 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/word-problems.js` | Word problems (sanalliset tehtävät): parts of a whole, consecutive numbers, perimeter, quadratic area/product problems. |
 | `js/fraction-equations.js` | Equations with fractions: clear them by multiplying every term by the lowest common denominator. |
 | `js/proportion-problems.js` | Direct and inverse proportionality (suoraan / kääntäen verrannollisuus), incl. squares, cubes and tables. |
+| `js/systems.js` | Plain systems of two linear equations: substitution, adding / subtracting, multiplying first. |
 | `js/system-problems.js` | Word problems with two unknowns (two kinds of items, a system of two linear equations). |
 | `js/model-problems.js` | Linear-model word problems: model from data, containers with identical objects, consistency of information. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
@@ -34,7 +35,7 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → proportion-problems → system-problems → model-problems → inequalities → ui → embed`.
+`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → systems → proportion-problems → system-problems → model-problems → inequalities → ui → embed`.
 `expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`.
 
 ## Content model
@@ -43,7 +44,7 @@ Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`,
 
 | Topic | Level keys |
 |---|---|
-| equations | `linear-basic`, `linear-twoStep`, `linear-bothSides`, `frac-simple`, `frac-linear`, `quad-factored`, `quad-incomplete`, `quad-general`, `cubic`, `quartic`, `frac-rational` |
+| equations | `linear-basic`, `linear-twoStep`, `linear-bothSides`, `frac-simple`, `frac-linear`, `sys-substitution`, `sys-elimination`, `sys-multiply`, `quad-factored`, `quad-incomplete`, `quad-general`, `cubic`, `quartic`, `frac-rational` |
 | expressions | `expand-number`, `expand-monomial`, `expand-binomials`, `radical-simplify`, `radical-addsub`, `radical-muldiv`, `radical-expand`, `radical-rationalize` |
 | inequalities | `ineq-linear`, `ineq-product`, `ineq-quadratic`, `ineq-cubic`, `ineq-quartic` |
 | graphs | `graph-value`, `func-equation`, `func-compare`, `graph-interpret` |
@@ -218,3 +219,7 @@ There is no test suite in the repo. While building, generators were verified by 
 ### System problems
 
 `system-problems.js`, level `word-system` (Two Kinds of Items): n items of two kinds with the values a and b are worth S together (bills, coins, notebooks and pads, tickets, bicycles and cars by wheels, hens and rabbits by legs, 2- and 3-point baskets, bicycles and tricycles). The numbers x and y (both ≥ 3, x ≠ y) are chosen first, then S = a·x + b·y, so the system `x + y = n, ax + by = S` has exactly one solution and the answers are whole numbers. The solution writes the system (`\begin{cases}`), expresses y = n − x, substitutes, multiplies out the bracket, combines like terms, solves for x, then finds y. Stories live in `SYSTEM_THEMES` (`pairs` of values, `n` range, `text`, `question`, `labels`); texts in `TEXTS.system`. Note: global names must not clash with other files (`coefX` is already in equations.js, so the helper here is `sysCoefX`).
+
+### Systems of equations
+
+`systems.js`: three levels in Equations, `sys-substitution`, `sys-elimination`, `sys-multiply`. The solution (x, y) is chosen first (non-zero whole numbers, x ≠ y), the equations are built around it; the problem is `kind: 'numbers'`, `ordered: true`, `labels: ['x', 'y']`, `latex` = `\begin{cases} … \end{cases}`. Substitution: the first equation is `y = kx + m` (or `x = ky + m`), put into `ax + by = c`, expand, combine, solve, then find the other variable. Elimination (`sysElimination(multiply)`): the variable to cancel (x or y) is chosen; without multiplying the coefficients are equal (subtract) or opposite (add); with multiplying a pair from `SYS_MULTIPLY_PAIRS` (e.g. 2 and 3, 2 and 4) is used and both equations are multiplied by L/|coefficient| (L = lcm), then added or subtracted; the value found is put into the first original equation. Helpers are prefixed `sys…` (global names must not clash with other files); texts in `TEXTS.linsys`. Checked by solving every generated system independently with Cramer's rule.
