@@ -263,6 +263,8 @@ function renderLatexInto(el, latex) {
 
 // ─── session (set of SESSION_LENGTH problems) ─────────────────────────────────
 function startSession() {
+  const generator = GENERATORS[currentSubtopic];
+  if (generator && generator.reset) generator.reset();     // mixed levels: begin a new round of parts
   session = {
     subtopic: currentSubtopic,
     index:    0,

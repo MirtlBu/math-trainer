@@ -28,6 +28,8 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/fraction-equations.js` | Equations with fractions: clear them by multiplying every term by the lowest common denominator. |
 | `js/proportion-problems.js` | Direct and inverse proportionality (suoraan / kääntäen verrannollisuus), incl. squares, cubes and tables. |
 | `js/systems.js` | Plain systems of two linear equations: substitution, adding / subtracting, multiplying first. |
+| `js/percent-problems.js` | Percent word problems: a percent of a quantity, percent change, finding the original value. |
+| `js/percent-advanced.js` | More percent levels: true statements (the base trap), percentage points and times, rounding, successive and compound changes, mixtures. |
 | `js/system-problems.js` | Word problems with two unknowns (two kinds of items, a system of two linear equations). |
 | `js/model-problems.js` | Linear-model word problems: model from data, containers with identical objects, consistency of information. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
@@ -35,8 +37,8 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → systems → proportion-problems → system-problems → model-problems → inequalities → ui → embed`.
-`expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`.
+`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → systems → proportion-problems → system-problems → percent-problems → percent-advanced → model-problems → inequalities → mixed-levels → ui → embed`.
+`expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`. `mixed-levels.js` goes last (before `ui.js`): it needs all the other generators.
 
 ## Content model
 
@@ -44,14 +46,18 @@ Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`,
 
 | Topic | Level keys |
 |---|---|
-| equations | `linear-basic`, `linear-twoStep`, `linear-bothSides`, `frac-simple`, `frac-linear`, `sys-substitution`, `sys-elimination`, `sys-multiply`, `quad-factored`, `quad-incomplete`, `quad-general`, `cubic`, `quartic`, `frac-rational` |
-| expressions | `expand-number`, `expand-monomial`, `expand-binomials`, `radical-simplify`, `radical-addsub`, `radical-muldiv`, `radical-expand`, `radical-rationalize` |
-| inequalities | `ineq-linear`, `ineq-product`, `ineq-quadratic`, `ineq-cubic`, `ineq-quartic` |
-| graphs | `graph-value`, `func-equation`, `func-compare`, `graph-interpret` |
+| equations | `linear-basic`, `linear-medium`*, `frac-simple`, `frac-hard`*, `sys-medium`*, `sys-multiply`, `quad-medium`*, `poly-hard`* |
+| expressions | `expand-number`, `expand-medium`*, `radical-simplify`, `radical-medium`*, `radical-hard`* |
+| inequalities | `ineq-linear`, `ineq-hard`* |
+| graphs | `graph-easy`*, `graph-medium`* |
 | numbers | `numset-sets`, `numdec-fractions` |
-| words | `word-parts`, `word-consecutive`, `word-geometry`, `word-quadratic`, `word-system`, `model-data`, `model-decimal`, `model-containers`, `model-consistency`, `prop-direct`, `prop-inverse`, `prop-identify` |
+| words | `word-eq`*, `word-quadratic`, `perc-of`, `perc-medium`*, `perc-hard`*, `model-medium`*, `model-hard`*, `prop-medium`*, `prop-identify` |
 
-Home also has disabled placeholders (Functions & Graphs, Geometry).
+Levels marked * are **mixed levels** (see below). Home also has disabled placeholders (Functions & Graphs, Geometry).
+
+### Mixed levels
+
+Related levels of the same difficulty are shown as one card, and the 10 problems of a set come from all of its parts. `js/mixed-levels.js` has `MIXED_LEVELS = { 'perc-medium': ['perc-change', 'perc-compare', …], … }`; for every entry it registers `GENERATORS[level] = mixedGenerator(parts)`. The generator goes through the parts in a shuffled order and then again in a new shuffled order (round-robin), so every part appears (10 problems: 5 parts → twice each; 4 parts → 3, 3, 2, 2; 3 parts → 3, 3, 4; 2 parts → 5 each) and the same part never comes twice in a row, also across rounds. `startSession` calls the generator's `reset()` first, so every set begins with a fresh round (with 6 parts and 10 problems all 6 appear). The problem gets `problem.part` (the part's key). The parts stay in `GENERATORS` with their own keys, but have no card of their own. To merge or split levels: edit `MIXED_LEVELS` and the cards in `index.html` (the cards in every topic are sorted by difficulty, Beginner → Intermediate → Advanced, and the next-level button follows the page order, so keep a new card in its place by difficulty). Completed marks are stored by the card key, so renaming a card key resets its mark.
 
 ### A problem
 
@@ -223,3 +229,9 @@ There is no test suite in the repo. While building, generators were verified by 
 ### Systems of equations
 
 `systems.js`: three levels in Equations, `sys-substitution`, `sys-elimination`, `sys-multiply`. The solution (x, y) is chosen first (non-zero whole numbers, x ≠ y), the equations are built around it; the problem is `kind: 'numbers'`, `ordered: true`, `labels: ['x', 'y']`, `latex` = `\begin{cases} … \end{cases}`. Substitution: the first equation is `y = kx + m` (or `x = ky + m`), put into `ax + by = c`, expand, combine, solve, then find the other variable. Elimination (`sysElimination(multiply)`): the variable to cancel (x or y) is chosen; without multiplying the coefficients are equal (subtract) or opposite (add); with multiplying a pair from `SYS_MULTIPLY_PAIRS` (e.g. 2 and 3, 2 and 4) is used and both equations are multiplied by L/|coefficient| (L = lcm), then added or subtracted; the value found is put into the first original equation. Helpers are prefixed `sys…` (global names must not clash with other files); texts in `TEXTS.linsys`. Checked by solving every generated system independently with Cramer's rule.
+
+### Percent problems
+
+`percent-problems.js` (`kind: 'value'`, the question says in which unit to answer; every answer is exact, at most one decimal). `perc-of`: p % of a quantity (money, kg, metres, inhabitants; decimal percents such as 0.5 or 3.5), the same with a unit conversion (0.1 % of 20 kg in grams: `pcConvert`), fat in milk or cream from the volume in dl (1 litre ≈ 1 kg: `pcMilk`), and "what percent is B of A" (`pcWhatPercent`). `perc-change`: the percent change from the old and new value (cheese €4 → €5, Cooper test 2500 → 3000 m; increases and decreases) or the new value after a rise / fall of p % (multiplier 1 ± p/100). `perc-compare`: two values, "by what percent is A more / less than B?"; the base is the value after "than", so the same pair gives different percents (125 vs 100 gives 25 % more but 20 % less); `generatePercentCompare`, stories in `PC_COMPARE`. `perc-reverse`: the original value from the changed one: after a raise or a discount, after VAT (25.5 %, 14 %, 10 %), "p % of a number is B"; solved as the equation `factor·x = value`. Stories carry a realistic `range: [lo, hi, step]` for the starting value (`pcBase`), and `maxP` to limit the percent where a big rise would be silly. Texts in `TEXTS.percent`; helpers start with `pc…`.
+
+`percent-advanced.js` (uses the `pc…` helpers of percent-problems.js). `perc-statements` (`choice`, 4 options, "None of the statements is true" is always first): two values with the ratio from `PC_RATIOS` (5:4, 8:5, 2:1, 5:2, chosen so that both "x % more" and "y % less" are exact); true statements are "the larger is x % more" and "the smaller is y % less"; the wrong ones use the other base (or a made-up percent), in about 40 % of the problems none is true; options are checked to be distinct. `perc-points`: percentage points (plain difference), percent change of a rate, "how many times as large" (ratio), and the conversion times ↔ percent. `perc-round`: the answer is the **rounded** value (`Number(v.toFixed(d))`) and the question says how to round, so the normal exact comparison works with no tolerance; values that are exact or too close to a rounding tie are skipped. `perc-successive`: two changes in a row (final value from a given start, or the total percent change with the start taken as 100; negative answers allowed). `perc-compound`: the same change for 2–3 periods (savings, car value, population, evaporation); every intermediate value is exact. `perc-factor` (`choice`): "if x grows / falls by 1.2 %, the new value is …" with options such as `1.012x`, `0.012x`, `0.988x`, `2.2x`; `perc-net` (`choice`): two changes in a row (price raised 10 % before Christmas and lowered 10 % after) and "how did it change compared with the original?" with the traps "did not change" and the sum of the percents. In `perc-successive` the same change twice in a row is worded "fell by 10 % in each of two consecutive years" (`repeat` in the theme) and then the question asks for the size of the decrease (a positive number). `perc-mixture`: the percentage of a mixture of two solutions, or the water to add to reach a lower concentration.
