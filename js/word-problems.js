@@ -366,10 +366,80 @@ function generateWordQuadratic() {
   };
 }
 
+// ─── level: a changed amount compared with another changed amount ────────────
+
+const MODIFY_THEMES = [
+  { start: who => `${who} has some €1 coins in a pocket.`, unit: 'coins', at: 'in the pocket', place: 'the pocket',
+    put: n => `adds ${n} coins`, putIng: n => `adding ${n} coins`, take: n => `takes ${n} coins out`, takeIng: n => `taking ${n} coins out`,
+    ask: 'How many coins are in the pocket now?' },
+  { start: who => `${who} has a bag of marbles.`, unit: 'marbles', at: 'in the bag', place: 'the bag',
+    put: n => `adds ${n} marbles`, putIng: n => `adding ${n} marbles`, take: n => `takes ${n} marbles out`, takeIng: n => `taking ${n} marbles out`,
+    ask: 'How many marbles are in the bag now?' },
+  { start: who => `${who}'s sticker album has some stickers in it.`, unit: 'stickers', at: 'in the album', place: 'the album',
+    put: n => `sticks in ${n} more stickers`, putIng: n => `sticking in ${n} more stickers`, take: n => `removes ${n} stickers`, takeIng: n => `removing ${n} stickers`,
+    ask: 'How many stickers are in the album now?' },
+  { start: who => `${who} has some books on a shelf.`, unit: 'books', at: 'on the shelf', place: 'the shelf',
+    put: n => `puts ${n} more books on the shelf`, putIng: n => `putting ${n} more books on the shelf`, take: n => `takes ${n} books off the shelf`, takeIng: n => `taking ${n} books off the shelf`,
+    ask: 'How many books are on the shelf now?' },
+  { start: () => 'A number is chosen.', numeric: true, ask: 'What is the number?' },
+];
+
+const MULTIPLE_WORDS = { 2: 'twice', 3: 'three times', 4: 'four times', 5: 'five times' };
+const FRACTION_WORDS = { 2: 'half', 3: 'a third', 4: 'a quarter', 5: 'a fifth' };
+
+/**
+ * Two ways of changing the amount x are compared:
+ *   A:  x + a = k(x - b)   "after adding a there are k times as many as after taking b away"
+ *   B:  k(x - a) = x + b   "after taking a away there is 1/k of what there would be after adding b"
+ */
+function generateWordModify() {
+  const t = pickFresh('word-modify', MODIFY_THEMES);
+  const who = pick(NAMES);
+  const form = pick(['A', 'B']);
+  for (;;) {
+    const x = randInt(5, 40), k = pick([2, 3, 3, 4, 5]);
+    const taken = randInt(1, Math.min(x - 1, 12));                    // the amount taken away
+    const added = k * (x - taken) - x;                                // the amount added, so that the relation holds
+    if (added < 1 || added > 20) continue;
+    const a = form === 'A' ? added : taken, b = form === 'A' ? taken : added;   // A: add a, remove b. B: remove a, add b.
+    const rhsMultiple = k * b;
+
+    let text, equation, steps;
+    if (form === 'A') {
+      const body = t.numeric
+        ? `The number increased by ${a} is ${MULTIPLE_WORDS[k]} as large as the number decreased by ${b}.`
+        : `If ${who} ${t.put(a)}, there are ${MULTIPLE_WORDS[k]} as many ${t.unit} ${t.at} as there would be after ${t.takeIng(b)}.`;
+      text = `${t.start(who)} ${body}`;
+      equation = `x + ${a} = ${k}(x - ${b})`;
+      steps = [
+        { explanation: TEXTS.modify.letX(t.numeric), math: equation },
+        { explanation: TEXTS.words.expandBrackets, math: `x + ${a} = ${k}x - ${rhsMultiple}` },
+        { explanation: TEXTS.modify.numbersLeft, math: `${a + rhsMultiple} = ${coefX(k - 1)}` },
+      ];
+      if (k - 1 !== 1) steps.push({ explanation: TEXTS.solution.divide(k - 1), math: `x = \\dfrac{${a + rhsMultiple}}{${k - 1}} = ${x}` });
+    } else {
+      const body = t.numeric
+        ? `The number decreased by ${a} is ${FRACTION_WORDS[k]} of the number increased by ${b}.`
+        : `If ${who} ${t.take(a)}, ${t.place} holds ${FRACTION_WORDS[k]} of what it would hold after ${t.putIng(b)}.`;
+      text = `${t.start(who)} ${body}`;
+      equation = `${k}(x - ${a}) = x + ${b}`;
+      steps = [
+        { explanation: TEXTS.modify.letX(t.numeric), math: equation },
+        { explanation: TEXTS.words.expandBrackets, math: `${k}x - ${k * a} = x + ${b}` },
+        { explanation: TEXTS.modify.numbersRight, math: `${coefX(k - 1)} = ${b + k * a}` },
+      ];
+      if (k - 1 !== 1) steps.push({ explanation: TEXTS.solution.divide(k - 1), math: `x = \\dfrac{${b + k * a}}{${k - 1}} = ${x}` });
+    }
+    steps.push({ explanation: TEXTS.words.answerIs, math: `${x}` });
+    return { kind: 'value', text, question: t.ask, answer: x, equation, steps, meta: { form, x, k, a, b } };
+  }
+}
+
 // ─── register with the shared generator table (defined in equations.js) ──────
 Object.assign(GENERATORS, {
   'word-parts':       generateWordParts,
   'word-consecutive': generateWordNumbers,
   'word-geometry':    generateWordPerimeter,
   'word-quadratic':   generateWordQuadratic,
+  'word-modify':      generateWordModify,
 });

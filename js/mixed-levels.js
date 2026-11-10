@@ -25,8 +25,10 @@ const MIXED_LEVELS = {
   // graphs
   'graph-easy':     ['graph-value', 'func-equation'],
   'graph-medium':   ['func-compare', 'graph-interpret'],
+  // geometry
+  'geo-basic':      ['geo-perimeter', 'geo-area', 'geo-triangle-sides', 'geo-angles', 'geo-area-figure'],
   // word problems
-  'word-eq':        ['word-parts', 'word-consecutive', 'word-geometry', 'word-system'],
+  'word-eq':        ['word-parts', 'word-consecutive', 'word-geometry', 'word-system', 'word-modify'],
   'perc-medium':    ['perc-change', 'perc-compare', 'perc-statements', 'perc-points', 'perc-round', 'perc-factor'],
   'perc-hard':      ['perc-reverse', 'perc-successive', 'perc-compound', 'perc-mixture', 'perc-net'],
   'model-medium':   ['model-data', 'model-decimal'],
