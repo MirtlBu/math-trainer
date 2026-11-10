@@ -597,7 +597,7 @@
 } */
 
 .math-trainer .choice input {
-  margin-top: 8px;
+  margin-top: 8§px;
   accent-color: var(--clr-primary);
   flex-shrink: 0;
 }
@@ -971,3 +971,23 @@
     --pad-x: 16px;
   }
 }
+
+/* ============================================================
+   Geometry figures (js/figures.js)
+   ============================================================ */
+.math-trainer .fig-svg {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.math-trainer .fig-poly   { fill: none; stroke: var(--clr-text); stroke-width: 2.5; stroke-linejoin: round; }
+.math-trainer .fig-height { stroke: #c0392b; stroke-width: 2.5; stroke-dasharray: 7 6; }
+.math-trainer .fig-right  { fill: none; stroke: var(--clr-text); stroke-width: 1.5; }
+.math-trainer .fig-arc    { fill: none; stroke: var(--clr-primary); stroke-width: 2; }
+.math-trainer .fig-label  { font-family: var(--font); font-size: 15px; fill: var(--clr-text); }
+.math-trainer .fig-angle  { fill: var(--clr-primary); font-weight: 600; }
+.math-trainer .fig-label-height { fill: #c0392b; }

@@ -24,12 +24,15 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/graph-problems.js` | Word-problem generators on a linear graph or equation, built from those stories. |
 | `js/compare-problems.js` | Two characters with two linear equations (`D = 6t + 10`, `E = 3t + 20`): own stories + the generator. |
 | `js/number-problems.js` | Number sets (lukujoukot) and decimals ↔ fractions: the numbers, the sets they belong to, the generators. |
-| `js/word-problems.js` | Word problems (sanalliset tehtävät): parts of a whole, consecutive numbers, perimeter, quadratic area/product problems. |
+| `js/word-problems.js` | Word problems (sanalliset tehtävät): parts of a whole, consecutive numbers, perimeter, quadratic area/product problems, a changed amount compared with another. |
 | `js/fraction-equations.js` | Equations with fractions: clear them by multiplying every term by the lowest common denominator. |
 | `js/proportion-problems.js` | Direct and inverse proportionality (suoraan / kääntäen verrannollisuus), incl. squares, cubes and tables. |
 | `js/systems.js` | Plain systems of two linear equations: substitution, adding / subtracting, multiplying first. |
 | `js/percent-problems.js` | Percent word problems: a percent of a quantity, percent change, finding the original value. |
 | `js/percent-advanced.js` | More percent levels: true statements (the base trap), percentage points and times, rounding, successive and compound changes, mixtures. |
+| `js/formulas.js` | Formulas to learn by heart (geometry, short multiplication, quadratics, powers, percent, lines): which / blank / name / symbol / apply questions. |
+| `js/figures.js` | Draws geometry figures as SVG (triangles, rectangles, parallelograms; side labels, a dashed red height, right-angle marks, angle arcs). |
+| `js/geometry-problems.js` | Geometry word problems with pictures: perimeter, area, sides of triangles, angles, the area from a picture. |
 | `js/system-problems.js` | Word problems with two unknowns (two kinds of items, a system of two linear equations). |
 | `js/model-problems.js` | Linear-model word problems: model from data, containers with identical objects, consistency of information. |
 | `js/inequalities.js` | Inequality generators; reuse the builders; `signAnalysis` (sign table + answer intervals). |
@@ -37,12 +40,12 @@ Plain HTML + CSS + JavaScript, no build step, no framework. Math is rendered wit
 | `js/embed.js` | Options read from the URL for embedding (currently `?bg=`, see below). Loaded last. |
 
 Script order in `index.html` (later files use globals from earlier ones):
-`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → systems → proportion-problems → system-problems → percent-problems → percent-advanced → model-problems → inequalities → mixed-levels → ui → embed`.
+`texts → polynomial → intervals → numbers → radicals → equations → expressions → polynomial-equations → radical-problems → graph → graph-stories → graph-problems → compare-problems → number-problems → word-problems → fraction-equations → systems → proportion-problems → system-problems → percent-problems → percent-advanced → formulas → figures → geometry-problems → model-problems → inequalities → mixed-levels → ui → embed`.
 `expressions.js`, `polynomial-equations.js` and `inequalities.js` add themselves to `GENERATORS` with `Object.assign`. `mixed-levels.js` goes last (before `ui.js`): it needs all the other generators.
 
 ## Content model
 
-Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`, `numbers`, `words`). Each topic has a view in `index.html` with `.subtopic-card` elements; the card's `data-subtopic` is the key into `GENERATORS`.
+Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`, `numbers`, `words`, `formulas`, `geometry`). Each topic has a view in `index.html` with `.subtopic-card` elements; the card's `data-subtopic` is the key into `GENERATORS`.
 
 | Topic | Level keys |
 |---|---|
@@ -52,8 +55,10 @@ Levels live in **topics** (`equations`, `expressions`, `inequalities`, `graphs`,
 | graphs | `graph-easy`*, `graph-medium`* |
 | numbers | `numset-sets`, `numdec-fractions` |
 | words | `word-eq`*, `word-quadratic`, `perc-of`, `perc-medium`*, `perc-hard`*, `model-medium`*, `model-hard`*, `prop-medium`*, `prop-identify` |
+| formulas | `fm-geo-basic`, `fm-percent`, `fm-geo-shapes`, `fm-products`, `fm-powers`, `fm-linear`, `fm-quadratic`, `fm-geo-solids` |
+| geometry | `geo-basic`* |
 
-Levels marked * are **mixed levels** (see below). Home also has disabled placeholders (Functions & Graphs, Geometry).
+Levels marked * are **mixed levels** (see below). 
 
 ### Mixed levels
 
@@ -169,7 +174,7 @@ For `choice` problems the answer area shows a radio list instead of text inputs 
 
 ### Word problems
 
-`word-problems.js` builds a story, an equation and the steps from a hidden whole-number solution, so every answer is a whole number. The answers are `numbers` with `ordered: true` and named `labels`; the unknown `x` is always the first answer, and each problem also carries `equation` (LaTeX) and `meta` for checking, plus its own `hint` ("one answer per field, in the order of the labels"). `word-parts`: a total split into 3–6 parts that change by a constant step (rope, ribbon, plank, ski stages, prize money, monthly savings, pages read per day; larger or smaller each time); `word-consecutive`: consecutive integers / even / odd numbers with a given sum, or two numbers with a given sum and difference or ratio; `word-geometry`: perimeter of a rectangle (width + k, or m times the width) or of a triangle (sides x, x+a, x+b; or isosceles); `word-quadratic`: area of a rectangle with length = width + k and the product of two consecutive integers, solved with the shared `quadraticSolveSteps`, where the negative root is explicitly rejected. The linear levels share `sumSteps` (combine like terms, undo the constant, divide).
+`word-problems.js` builds a story, an equation and the steps from a hidden whole-number solution, so every answer is a whole number. The answers are `numbers` with `ordered: true` and named `labels`; the unknown `x` is always the first answer, and each problem also carries `equation` (LaTeX) and `meta` for checking, plus its own `hint` ("one answer per field, in the order of the labels"). `word-parts`: a total split into 3–6 parts that change by a constant step (rope, ribbon, plank, ski stages, prize money, monthly savings, pages read per day; larger or smaller each time); `word-consecutive`: consecutive integers / even / odd numbers with a given sum, or two numbers with a given sum and difference or ratio; `word-geometry`: perimeter of a rectangle (width + k, or m times the width) or of a triangle (sides x, x+a, x+b; or isosceles); `word-quadratic`: area of a rectangle with length = width + k and the product of two consecutive integers, solved with the shared `quadraticSolveSteps`, where the negative root is explicitly rejected. `word-modify` (`kind: 'value'`): two ways of changing an amount x are compared, form A `x + a = k(x − b)` ("after adding 3 coins there are three times as many as after taking 3 out") and form B `k(x − a) = x + b` ("after taking a away there is a third of what there would be after adding b"); x is chosen first, then the amount added is computed so that the relation holds; themes: coins, marbles, stickers, books and a plain number riddle (`MODIFY_THEMES`). The linear levels share `sumSteps` (combine like terms, undo the constant, divide).
 
 ### Number problems
 
@@ -235,3 +240,22 @@ There is no test suite in the repo. While building, generators were verified by 
 `percent-problems.js` (`kind: 'value'`, the question says in which unit to answer; every answer is exact, at most one decimal). `perc-of`: p % of a quantity (money, kg, metres, inhabitants; decimal percents such as 0.5 or 3.5), the same with a unit conversion (0.1 % of 20 kg in grams: `pcConvert`), fat in milk or cream from the volume in dl (1 litre ≈ 1 kg: `pcMilk`), and "what percent is B of A" (`pcWhatPercent`). `perc-change`: the percent change from the old and new value (cheese €4 → €5, Cooper test 2500 → 3000 m; increases and decreases) or the new value after a rise / fall of p % (multiplier 1 ± p/100). `perc-compare`: two values, "by what percent is A more / less than B?"; the base is the value after "than", so the same pair gives different percents (125 vs 100 gives 25 % more but 20 % less); `generatePercentCompare`, stories in `PC_COMPARE`. `perc-reverse`: the original value from the changed one: after a raise or a discount, after VAT (25.5 %, 14 %, 10 %), "p % of a number is B"; solved as the equation `factor·x = value`. Stories carry a realistic `range: [lo, hi, step]` for the starting value (`pcBase`), and `maxP` to limit the percent where a big rise would be silly. Texts in `TEXTS.percent`; helpers start with `pc…`.
 
 `percent-advanced.js` (uses the `pc…` helpers of percent-problems.js). `perc-statements` (`choice`, 4 options, "None of the statements is true" is always first): two values with the ratio from `PC_RATIOS` (5:4, 8:5, 2:1, 5:2, chosen so that both "x % more" and "y % less" are exact); true statements are "the larger is x % more" and "the smaller is y % less"; the wrong ones use the other base (or a made-up percent), in about 40 % of the problems none is true; options are checked to be distinct. `perc-points`: percentage points (plain difference), percent change of a rate, "how many times as large" (ratio), and the conversion times ↔ percent. `perc-round`: the answer is the **rounded** value (`Number(v.toFixed(d))`) and the question says how to round, so the normal exact comparison works with no tolerance; values that are exact or too close to a rounding tie are skipped. `perc-successive`: two changes in a row (final value from a given start, or the total percent change with the start taken as 100; negative answers allowed). `perc-compound`: the same change for 2–3 periods (savings, car value, population, evaporation); every intermediate value is exact. `perc-factor` (`choice`): "if x grows / falls by 1.2 %, the new value is …" with options such as `1.012x`, `0.012x`, `0.988x`, `2.2x`; `perc-net` (`choice`): two changes in a row (price raised 10 % before Christmas and lowered 10 % after) and "how did it change compared with the original?" with the traps "did not change" and the sum of the percents. In `perc-successive` the same change twice in a row is worded "fell by 10 % in each of two consecutive years" (`repeat` in the theme) and then the question asks for the size of the decrease (a positive number). `perc-mixture`: the percentage of a mixture of two solutions, or the water to add to reach a lower concentration.
+
+### Formulas
+
+`formulas.js` (topic `formulas`, 8 levels): learning formulas by heart. Each level has a list of formulas (and a few short facts such as "the unit of area") and goes through them in a shuffled order; `fmLevelGenerator(def)` deals a deck again and again, `reset()` is called at the start of a set (the formulas are in the deck `weight` times, the facts once). Each question about a formula is of one of these types, chosen at random from those the formula supports:
+
+- `which`: "Which formula gives the area of a rectangle?", the right one among 4 (3 typical mistakes from `wrong`);
+- `blank`: the formula with a gap `\boxed{?}` (`blanks: [{ tpl, ans, wrong }]`, `@@` marks the gap), options are the fragments (a lone sign is drawn in `\Large`);
+- `name`: the formula is shown, "What does this formula give?" (the other options are names of the formulas of the same level);
+- `symbol`: "In P = 2a + 2b, what does P stand for?" with the Finnish word (`symbols`, the wrong meanings come from the level's `pool`);
+- `apply`: a number problem that uses the formula (`kind: 'value'`, or a `choice` with answers in terms of π, `fmChoice`), checked independently;
+- `concept`: short facts (units, radius and diameter, the number of solutions for D < 0, the traps "(a+b)² = a²+b²?").
+
+A formula entry: `{ id, name, fi (the Finnish term), latex, note (what to remember), example (a check with numbers), wrong[], blanks[], symbols[], apply() }`. To add a formula: write the entry, put it into `items` of a level in `FM_LEVELS`. Checked by `t58`-style tests: a small LaTeX evaluator confirms that every algebraic rule is a true identity, that every wrong option really is false, that the blank answer rebuilds the formula and that the wrong fragments do not; real KaTeX compiles every string; the `apply` answers are recomputed independently from the problem text.
+
+### Geometry and figures
+
+`geometry-problems.js` + `figures.js`, topic `geometry`, level `geo-basic` (a mixed level of 5 parts, 2 problems each in a set): `geo-perimeter` (running around a field a few times, a fence, the missing side of a rectangle from the perimeter, the side of a square), `geo-area` (a square's area from its perimeter and back, a floor or a wall, the missing side from the area), `geo-triangle-sides` (equilateral / isosceles triangle from the perimeter, the third side), `geo-angles` (isosceles apex or base angle, the third angle, a right triangle, a straight angle, a quadrilateral) and `geo-area-figure` (the area of a triangle or a parallelogram from a picture that also shows lengths which are not needed: the slanted sides). All are `kind: 'value'` with exact answers.
+
+A problem may have `figure` (like `graph`): `{ pts, sides, height, angles, right, aria }` (see the comment in `figures.js`); `showProblem` draws it with `renderFigure` into the same container as graphs. `pts` are the corners in real proportions (a rectangle 80 × 55 is drawn 80 : 55; a triangle with the angles 28°, 28°, 124° has these angles), the drawing is scaled to fit. Side labels are pushed away from the middle of the shape, the dashed height gets its label on the side with more room, and an angle label goes inside its corner if there is room (a narrow corner, or two labels that would touch, put it outside). The tests check the drawing against the numbers: the side labels equal the distances between the points, the drawn angles equal the labels (the '?' equals the answer), the height is vertical. The topic card was a disabled placeholder before. To add a figure type: make a `spec`; no new drawing code is needed for polygons.

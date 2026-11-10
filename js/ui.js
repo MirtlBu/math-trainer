@@ -125,11 +125,13 @@ const views = {
   graphs:    document.getElementById('view-graphs'),
   numbers:   document.getElementById('view-numbers'),
   words:     document.getElementById('view-words'),
+  formulas:  document.getElementById('view-formulas'),
+  geometry:  document.getElementById('view-geometry'),
   practice:  document.getElementById('view-practice'),
 };
 
 const breadcrumb      = document.getElementById('breadcrumb');
-const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs', 'numbers', 'words'];   // views that list subtopic cards
+const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs', 'numbers', 'words', 'formulas', 'geometry'];   // views that list subtopic cards
 
 const problemText     = document.getElementById('problem-text');
 const problemGraph    = document.getElementById('problem-graph');
@@ -540,9 +542,10 @@ function showProblem() {
   problemEquation.style.display = problem.latex ? '' : 'none';
   if (problem.latex) renderLatexInto(problemEquation, problem.latex);
 
-  problemGraph.style.display = problem.graph ? '' : 'none';
-  if (problem.graph) renderGraph(problemGraph, problem.graph);
-  else               problemGraph.innerHTML = '';
+  problemGraph.style.display = (problem.graph || problem.figure) ? '' : 'none';
+  if (problem.graph)       renderGraph(problemGraph, problem.graph);
+  else if (problem.figure) renderFigure(problemGraph, problem.figure);
+  else                     problemGraph.innerHTML = '';
 
   setupForKind(kind, problem);
   if (isChoiceKind(kind)) buildChoices(problem);

@@ -84,10 +84,16 @@
           <p>From the story to the equation</p>
         </div>
 
-        <div class="topic-card disabled">
+        <div class="topic-card" data-topic="formulas">
+          <div class="topic-icon">&#x3C0;</div>
+          <h2>Formulas</h2>
+          <p>Learn the key formulas</p>
+        </div>
+
+        <div class="topic-card" data-topic="geometry">
           <div class="topic-icon">&#x25B3;</div>
           <h2>Geometry</h2>
-          <p>Coming soon</p>
+          <p>Perimeter, area and angles</p>
         </div>
 
       </section>
@@ -327,7 +333,7 @@
             <span class="difficulty medium">Intermediate</span>
           </div>
           <h3>Word Problems — Setting Up Equations</h3>
-          <p>Parts of a whole, consecutive numbers, perimeter, two kinds of items: write the equation from the story</p>
+          <p>Parts of a whole, consecutive numbers, perimeter, two kinds of items, "after adding 3 coins there are three times as many as after taking 3 away": write the equation from the story</p>
         </div>
 
         <div class="subtopic-card" data-subtopic="perc-medium">
@@ -384,6 +390,102 @@
           </div>
           <h3>Which Dependence? — Direct, Inverse or Neither</h3>
           <p>Read a table of values: is $y$ directly or inversely proportional to $x$? Find the constant $k$</p>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- GEOMETRY VIEW: subtopic list -->
+    <main id="view-geometry" class="view" data-topic="geometry">
+      <section class="subtopic-header">
+        <h1>Geometry</h1>
+        <p>Choose a type to practice</p>
+      </section>
+
+      <section class="subtopic-list">
+
+        <div class="subtopic-card" data-subtopic="geo-basic">
+          <div class="subtopic-meta">
+            <span class="difficulty easy">Beginner</span>
+          </div>
+          <h3>Perimeter, Area and Angles</h3>
+          <p>Running around a field, a square from its perimeter, sides and angles of triangles, the area of a triangle from a picture</p>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- FORMULAS VIEW: subtopic list -->
+    <main id="view-formulas" class="view" data-topic="formulas">
+      <section class="subtopic-header">
+        <h1>Formulas</h1>
+        <p>Choose a type to practice</p>
+      </section>
+
+      <section class="subtopic-list">
+
+        <div class="subtopic-card" data-subtopic="fm-geo-basic">
+          <div class="subtopic-meta">
+            <span class="difficulty easy">Beginner</span>
+          </div>
+          <h3>Geometry — Symbols, Perimeter and Area</h3>
+          <p>What are $P$ and $A$? $P = 2a + 2b$, $A = a \cdot b$, units, radius and diameter</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="fm-percent">
+          <div class="subtopic-meta">
+            <span class="difficulty easy">Beginner</span>
+          </div>
+          <h3>Percent Formulas</h3>
+          <p>A percent of a quantity, percent change, the value after an increase or a discount</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="fm-geo-shapes">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Geometry — Triangles, Circles, Pythagoras</h3>
+          <p>$A = \dfrac{1}{2}bh$, $A = \pi r^2$, $C = 2\pi r$, $c^2 = a^2 + b^2$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="fm-products">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Short Multiplication Formulas</h3>
+          <p>$(a - b)^2 = a^2 - 2ab + b^2$, $(a + b)(a - b) = a^2 - b^2$ and factoring</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="fm-powers">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Powers and Roots</h3>
+          <p>$a^m \cdot a^n = a^{m + n}$, $(a^m)^n$, $a^{-n}$, $\sqrt{ab} = \sqrt{a}\sqrt{b}$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="fm-linear">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Lines, Slope and Speed</h3>
+          <p>$y = kx + b$, $k = \dfrac{y_2 - y_1}{x_2 - x_1}$, $v = \dfrac{s}{t}$</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="fm-quadratic">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Quadratics — Discriminant and Vieta</h3>
+          <p>$D = b^2 - 4ac$, the quadratic formula, the sum and product of the roots</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="fm-geo-solids">
+          <div class="subtopic-meta">
+            <span class="difficulty hard">Advanced</span>
+          </div>
+          <h3>Geometry — Volumes and Surface Areas</h3>
+          <p>$V = a \cdot b \cdot c$, $V = \pi r^2 h$, $V = \dfrac{4}{3}\pi r^3$, cones and pyramids</p>
         </div>
 
       </section>
@@ -480,6 +582,9 @@
   <script src="js/system-problems.js"></script>
   <script src="js/percent-problems.js"></script>
   <script src="js/percent-advanced.js"></script>
+  <script src="js/formulas.js"></script>
+  <script src="js/figures.js"></script>
+  <script src="js/geometry-problems.js"></script>
   <script src="js/model-problems.js"></script>
   <script src="js/inequalities.js"></script>
   <script src="js/mixed-levels.js"></script>

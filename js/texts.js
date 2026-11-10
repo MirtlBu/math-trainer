@@ -16,6 +16,8 @@ const TEXTS = {
     graphs: 'Functions & Graphs',
     numbers: 'Numbers',
     words: 'Word Problems',
+    formulas: 'Formulas',
+    geometry: 'Geometry',
   },
 
   // ─── practice screen ────────────────────────────────────────────────────────
@@ -141,6 +143,47 @@ const TEXTS = {
     concludeDirect: 'The ratio $\\dfrac{y}{x}$ is constant, so $y$ is directly proportional to $x$.',
     concludeInverse: 'The product $x \\cdot y$ is constant, so $y$ is inversely proportional to $x$.',
     concludeNeither: 'Neither the ratio nor the product is constant, so $y$ is neither directly nor inversely proportional to $x$.',
+  },
+
+  // ─── geometry (geometry-problems.js) ─────────────────────────────────────────
+  geometry: {
+    perimeterRect: 'The perimeter of a rectangle is two lengths plus two widths.',
+    timesLaps: (k) => `The field is run around ${k} times, so multiply the perimeter by ${k}.`,
+    halfPerimeter: 'The perimeter is two lengths plus two widths, so one length plus one width is half of the perimeter.',
+    otherSide: 'Subtract the known side to get the other side.',
+    squareSideFromPerimeter: 'A square has four equal sides: divide the perimeter by 4.',
+    areaSquare: 'The area of a square is the side times itself.',
+    sqrtSide: 'The area of a square is the side times itself, so the side is the square root of the area.',
+    perimeterSquare: 'The perimeter of a square is four sides.',
+    areaRect: 'The area of a rectangle is the length times the width.',
+    otherSideFromArea: 'The area is the length times the width: divide the area by the known side.',
+    equilateral: 'All three sides of an equilateral triangle are equal: divide the perimeter by 3.',
+    isoLeg: 'The two equal sides together are the perimeter minus the base. Divide by 2.',
+    isoBase: 'The base is the perimeter minus the two equal sides.',
+    thirdSide: 'The perimeter is the sum of the three sides: subtract the two known sides.',
+    angleSum: 'The angles of a triangle add up to 180°.',
+    isoBaseAngles: 'The two base angles of an isosceles triangle are equal.',
+    rightAngleSum: 'The angles of a triangle add up to 180°, and one angle is 90°.',
+    straightAngle: 'Angles next to each other on a straight line add up to 180°.',
+    quadAngleSum: 'The angles of a quadrilateral add up to 360°.',
+    baseAndHeight: 'The area needs the base and the height that is perpendicular to it (the dashed line). The other sides are not needed.',
+    parallelogramHeight: 'The area needs the base and the perpendicular height (the dashed line), not the slanted side.',
+  },
+
+  // ─── formulas (formulas.js) ──────────────────────────────────────────────────
+  formulas: {
+    useFormula: (name) => `Use the formula for the ${name}.`,
+    putNumbers: 'Put in the numbers.',
+    theFormula: (name, fi) => `The ${name}${fi ? ` (Finnish: <i>${fi}</i>)` : ''}:`,
+    where: (list) => `Here ${list}.`,
+    checkNumbers: 'Check with numbers:',
+  },
+
+  // ─── a changed amount compared with another (word-problems.js) ──────────────
+  modify: {
+    letX: (numeric) => numeric ? 'Let $x$ be the number and write the equation from the sentence.' : 'Let $x$ be the number now and write the equation from the sentence.',
+    numbersRight: 'Move the terms with $x$ to the left side and the numbers to the right side.',
+    numbersLeft: 'Move the terms with $x$ to the right side and the numbers to the left side.',
   },
 
   // ─── percent problems (percent-problems.js) ────────────────────────────────
