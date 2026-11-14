@@ -7,7 +7,7 @@
  *   spec = {
  *     x: { min, max, step, label },   // grid line / tick every `step`; label = axis name
  *     y: { min, max, step, label },
- *     lines: [{ fn }],                // fn(x) → y, drawn over the whole x range
+ *     lines: [{ fn, label }],         // fn(x) → y, drawn over the whole x range; label = a name (g) next to the line
  *     caption,                        // optional small text under the graph
  *     ariaLabel,                      // optional description for screen readers
  *   }
@@ -89,6 +89,17 @@ function renderGraph(container, spec) {
       d += `${i === 0 ? 'M' : 'L'} ${sx(x).toFixed(2)} ${sy(line.fn(x)).toFixed(2)} `;
     }
     svg.appendChild(svgEl('path', { class: 'graph-line', d, 'clip-path': `url(#${id})` }));
+
+    // an optional name of the line (f, g) near its right end, where the line is still inside the plot
+    if (line.label) {
+      for (let x = X.max - 0.4; x > X.min; x -= 0.25) {
+        const y = line.fn(x);
+        if (y > Y.min + 0.4 && y < Y.max - 0.4) {
+          svg.appendChild(svgEl('text', { class: 'graph-line-label', x: sx(x) + 8, y: sy(y) - 8, 'text-anchor': 'start' }, line.label));
+          break;
+        }
+      }
+    }
   });
 
   // reading marker (hidden until the pointer is over the graph)

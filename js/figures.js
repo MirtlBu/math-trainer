@@ -39,7 +39,38 @@ function figRoomIn(P, pt, margin) {
   return inside;
 }
 
+/**
+ * A cuboid in an oblique view: spec.cuboid = { a, b, h } (the width of the front, the depth and the height),
+ * spec.labels = { a, b, h } (texts such as '5.0 cm' or '?'). Hidden edges are dashed.
+ */
+function cuboidSvg(spec) {
+  const { W, H, padX, padY } = FIG;
+  const { a, b, h } = spec.cuboid, d = 0.35 * b;                                 // the depth is drawn at 45°, shortened
+  const front = [[0, 0], [a, 0], [a, h], [0, h]], back = front.map(p => [p[0] + d, p[1] + d]);
+  const all = front.concat(back);
+  const xs = all.map(p => p[0]), ys = all.map(p => p[1]);
+  const minX = Math.min(...xs), minY = Math.min(...ys), bw = Math.max(...xs) - minX, bh = Math.max(...ys) - minY;
+  const k = Math.min((W - 2 * padX) / bw, (H - 2 * padY) / bh);
+  const ox = (W - bw * k) / 2, oy = (H - bh * k) / 2;
+  const T = p => [ox + (p[0] - minX) * k, H - (oy + (p[1] - minY) * k)];
+  const F = front.map(T), B = back.map(T);
+  const pt = p => `${figFmt(p[0])},${figFmt(p[1])}`;
+  const line = (cls, p, q) => `<line class="${cls}" x1="${figFmt(p[0])}" y1="${figFmt(p[1])}" x2="${figFmt(q[0])}" y2="${figFmt(q[1])}"/>`;
+  const out = [];
+  [[F[0], B[0]], [B[0], B[1]], [B[0], B[3]]].forEach(([p, q]) => out.push(line('fig-hidden', p, q)));          // behind
+  out.push(`<polygon class="fig-poly" points="${F.map(pt).join(' ')}"/>`);                                     // the front
+  out.push(`<polygon class="fig-poly" points="${[F[3], F[2], B[2], B[3]].map(pt).join(' ')}"/>`);              // the top
+  out.push(`<polygon class="fig-poly" points="${[F[1], F[2], B[2], B[1]].map(pt).join(' ')}"/>`);              // the right side
+  const L = spec.labels || {};
+  const text = (cls, p, anchor, label) => label ? `<text class="fig-label${cls}" x="${figFmt(p[0])}" y="${figFmt(p[1])}" text-anchor="${anchor}">${figEsc(label)}</text>` : '';
+  out.push(text('', [(F[0][0] + F[1][0]) / 2, F[0][1] + 20], 'middle', L.a));                                  // a: under the front
+  out.push(text('', [F[0][0] - 10, (F[0][1] + F[3][1]) / 2 + 5], 'end', L.h));                                 // h: left of the front
+  out.push(text('', [(F[1][0] + B[1][0]) / 2 + 12, (F[1][1] + B[1][1]) / 2 + 12], 'start', L.b));            // b: the depth
+  return `<svg class="fig-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${figEsc(spec.aria || 'A cuboid')}">${out.join('')}</svg>`;
+}
+
 function figureSvg(spec) {
+  if (spec.cuboid) return cuboidSvg(spec);
   const { W, H, padX, padY } = FIG;
   const raw = spec.pts;
   const extra = spec.height ? [spec.height.apex, spec.height.foot] : [];

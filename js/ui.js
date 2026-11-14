@@ -127,11 +127,13 @@ const views = {
   words:     document.getElementById('view-words'),
   formulas:  document.getElementById('view-formulas'),
   geometry:  document.getElementById('view-geometry'),
+  sandbox:   document.getElementById('view-sandbox'),
+  toy:       document.getElementById('view-toy'),
   practice:  document.getElementById('view-practice'),
 };
 
 const breadcrumb      = document.getElementById('breadcrumb');
-const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs', 'numbers', 'words', 'formulas', 'geometry'];   // views that list subtopic cards
+const TOPICS          = ['equations', 'expressions', 'inequalities', 'graphs', 'numbers', 'words', 'formulas', 'geometry', 'sandbox'];   // views that list subtopic cards
 
 const problemText     = document.getElementById('problem-text');
 const problemGraph    = document.getElementById('problem-graph');
@@ -198,6 +200,24 @@ function goPractice(topic, subtopic, label) {
   // coming back to the same level resumes the set; another level starts a new one
   if (session && session.subtopic === subtopic) showProblem();
   else startSession();
+}
+
+/** A toy of the Sandbox: its own screen, filled by TOYS[key].mount (see sandbox.js) */
+function goToy(key, label) {
+  const toy = TOYS[key];
+  if (!toy) return;
+  currentTopic = 'sandbox';
+  inPractice = false;
+  saveState();
+  showView('toy');
+  setBreadcrumb([
+    { label: TEXTS.nav.home,    view: 'home' },
+    { label: TEXTS.nav.sandbox, view: 'sandbox' },
+    { label: label,             view: null },
+  ]);
+  const root = document.getElementById('toy-root');
+  root.innerHTML = '';
+  toy.mount(root);
 }
 
 /** Next enabled subtopic after the current one (in the order shown on the page), or null */
@@ -783,13 +803,18 @@ views.home.querySelectorAll('.topic-card:not(.disabled)').forEach(card => {
 
 // Subtopic cards on each topic view
 TOPICS.forEach(topic => {
-  views[topic].querySelectorAll('.subtopic-card:not(.disabled)').forEach(card => {
+  views[topic].querySelectorAll('.subtopic-card[data-subtopic]:not(.disabled)').forEach(card => {
     card.addEventListener('click', () => {
       const subtopic = card.dataset.subtopic;
       const label    = card.querySelector('h3').textContent;
       goPractice(topic, subtopic, label);
     });
   });
+});
+
+// Toy cards of the Sandbox
+views.sandbox.querySelectorAll('.subtopic-card[data-toy]').forEach(card => {
+  card.addEventListener('click', () => goToy(card.dataset.toy, card.querySelector('h3').textContent));
 });
 
 // Edge fades follow the scroll position and any change of size (KaTeX finishing, window resize)

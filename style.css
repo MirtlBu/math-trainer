@@ -991,3 +991,161 @@
 .math-trainer .fig-label  { font-family: var(--font); font-size: 15px; fill: var(--clr-text); }
 .math-trainer .fig-angle  { fill: var(--clr-primary); font-weight: 600; }
 .math-trainer .fig-label-height { fill: #c0392b; }
+.math-trainer .fig-hidden { stroke: var(--clr-muted); stroke-width: 1.8; stroke-dasharray: 5 5; }
+.math-trainer .graph-line-label { font-family: var(--font); font-size: 16px; font-weight: 600; font-style: italic; fill: var(--clr-primary); }
+
+/* a table of values in the text of a problem (js/fg-problems.js) */
+.math-trainer .fg-table {
+  border-collapse: collapse;
+  margin: 12px auto 16px;
+  min-width: 60%;
+}
+
+.math-trainer .fg-table th,
+.math-trainer .fg-table td {
+  border: 1px solid var(--clr-divider);
+  padding: 8px 24px;
+  text-align: center;
+}
+
+.math-trainer .fg-table th { font-weight: 600; }
+
+/* ============================================================
+   Sandbox toys (js/sandbox-*.js)
+   ============================================================ */
+
+.math-trainer .toy-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 8px 0 32px;
+}
+
+.math-trainer .toy-stage { position: relative; }
+
+.math-trainer .toy-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.math-trainer .toy-grid     { stroke: var(--clr-border); stroke-width: 1; }
+.math-trainer .toy-triangle { fill: rgba(26, 115, 232, .10); stroke: var(--clr-text); stroke-width: 2.5; stroke-linejoin: round; }
+.math-trainer .toy-height   { stroke: #c0392b; stroke-width: 2.5; stroke-dasharray: 7 6; }
+.math-trainer .toy-extend   { stroke: var(--clr-muted); stroke-width: 1.8; stroke-dasharray: 5 5; }
+.math-trainer .toy-right    { fill: none; stroke: var(--clr-text); stroke-width: 1.5; }
+.math-trainer .toy-arc      { fill: none; stroke: var(--clr-primary); stroke-width: 1.8; }
+.math-trainer .toy-fixed    { fill: var(--clr-text); }
+
+.math-trainer .toy-label {
+  font-family: var(--font);
+  font-size: 13px;
+  fill: var(--clr-text);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.math-trainer .toy-label:hover,
+.math-trainer .toy-label:focus-visible { fill: var(--clr-primary); outline: none; }
+.math-trainer .toy-height-label { fill: #c0392b; }
+
+.math-trainer .toy-handle { cursor: ew-resize; touch-action: none; outline: none; }
+.math-trainer .toy-handle-hit { fill: transparent; }
+.math-trainer .toy-handle-dot { fill: var(--clr-primary); stroke: #fff; stroke-width: 3; }
+.math-trainer .toy-handle:hover .toy-handle-dot,
+.math-trainer .toy-handle:focus-visible .toy-handle-dot { stroke: rgba(26, 115, 232, .35); stroke-width: 8; }
+
+.math-trainer .toy-input {
+  position: absolute;
+  width: 84px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: var(--fs-control);
+  border: 2px solid var(--clr-primary);
+  border-radius: var(--radius-control);
+  background: var(--clr-surface);
+  color: var(--clr-text);
+}
+
+.math-trainer .toy-status { min-height: 1.5em; margin: 4px 0 0; color: #c0392b; }
+
+.math-trainer .toy-panel { border-top: 1px solid var(--clr-divider); margin-top: 8px; }
+.math-trainer .toy-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--clr-divider);
+}
+.math-trainer .toy-row span { color: var(--clr-muted); min-width: 90px; }
+.math-trainer .toy-row b { font-weight: 600; }
+.math-trainer .toy-row em { color: var(--clr-success); font-style: normal; font-size: .9rem; }
+.math-trainer .toy-row-fixed b { color: var(--clr-success); }
+.math-trainer .toy-note { padding: 10px 0; color: var(--clr-muted); font-size: .9rem; }
+.math-trainer .toy-hint { margin: 12px 0; color: var(--clr-muted); }
+.math-trainer .toy-actions { margin-top: 8px; }
+.math-trainer .toy-angle { font-family: var(--font); font-size: 12px; font-weight: 600; fill: var(--clr-primary); pointer-events: none; }
+
+/* shared parts of the toys (js/sandbox-kit.js) */
+.math-trainer .toy-axis { stroke: var(--clr-text); stroke-width: 1.8; }
+.math-trainer .toy-tick { font-family: var(--font); font-size: 11px; fill: var(--clr-muted); }
+.math-trainer .toy-curve { fill: none; stroke: var(--clr-primary); stroke-width: 3; stroke-linecap: round; }
+.math-trainer .toy-curve-2 { fill: none; stroke: #c0392b; stroke-width: 3; stroke-linecap: round; }
+.math-trainer .toy-dot { fill: var(--clr-primary); stroke: #fff; stroke-width: 2; }
+.math-trainer .toy-dot-2 { fill: #c0392b; stroke: #fff; stroke-width: 2; }
+.math-trainer .toy-text { font-family: var(--font); font-size: 14px; fill: var(--clr-text); }
+.math-trainer .toy-text-muted { font-family: var(--font); font-size: 12px; fill: var(--clr-muted); }
+.math-trainer .toy-text-strong { font-family: var(--font); font-size: 14px; font-weight: 600; fill: var(--clr-text); }
+.math-trainer .toy-line-dashed { stroke: var(--clr-muted); stroke-width: 1.8; stroke-dasharray: 5 5; fill: none; }
+
+.math-trainer .toy-controls { margin: 8px 0 4px; }
+.math-trainer .toy-slider {
+  display: grid;
+  grid-template-columns: minmax(96px, 150px) 1fr 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+.math-trainer .toy-slider-label { color: var(--clr-muted); font-size: .95rem; }
+.math-trainer .toy-slider input[type="range"] { width: 100%; accent-color: var(--clr-primary); }
+.math-trainer .toy-slider output { font-weight: 600; text-align: right; }
+
+.math-trainer .toy-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+.math-trainer .toy-tab {
+  padding: 6px 14px;
+  border: 1px solid var(--clr-divider);
+  border-radius: var(--radius-control);
+  background: var(--clr-surface);
+  color: var(--clr-text);
+  font: inherit;
+  font-size: .95rem;
+  cursor: pointer;
+}
+.math-trainer .toy-tab.active { border-color: var(--clr-primary); color: var(--clr-primary); font-weight: 600; background: var(--clr-hover); }
+.math-trainer .toy-button { margin: 8px 8px 0 0; }
+.math-trainer .toy-row b { font-weight: 600; }
+.math-trainer .toy-ok b { color: var(--clr-success); }
+.math-trainer .toy-warn b { color: #c0392b; }
+.math-trainer .toy-fill   { fill: rgba(26, 115, 232, .55); }
+.math-trainer .toy-fill-2 { fill: rgba(192, 57, 43, .45); }
+.math-trainer .toy-fill-3 { fill: rgba(26, 119, 62, .5); }
+.math-trainer .toy-fill-half { fill: rgba(26, 115, 232, .25); }
+.math-trainer .toy-over   { fill: rgba(192, 57, 43, .35); }
+.math-trainer .toy-empty  { fill: var(--clr-surface); }
+.math-trainer .toy-repeat { text-decoration: overline; }
+.math-trainer .toy-note   { padding: 10px 0; color: var(--clr-muted); font-size: .9rem; }
+.math-trainer .toy-vertex { cursor: grab; touch-action: none; outline: none; }
+.math-trainer .toy-vertex .toy-handle-hit { fill: transparent; }
+.math-trainer .toy-vertex:focus-visible .toy-dot { stroke: rgba(26, 115, 232, .35); stroke-width: 7; }
+.math-trainer .toy-table { border-collapse: collapse; margin: 10px 0; }
+.math-trainer .toy-table th, .math-trainer .toy-table td { border: 1px solid var(--clr-divider); padding: 6px 14px; text-align: center; }
+.math-trainer .toy-table th { font-style: italic; font-weight: 600; background: var(--clr-hover); }
+.math-trainer .toy-block-x   { fill: var(--clr-primary); stroke: #fff; stroke-width: 1.5; }
+.math-trainer .toy-block-one { fill: #f6c445; stroke: #fff; stroke-width: 1.5; }
+.math-trainer .toy-steps { margin: 8px 0; padding-left: 22px; color: var(--clr-muted); }
+.math-trainer .toy-check { display: inline-flex; align-items: center; gap: 6px; margin: 8px 8px 0 0; color: var(--clr-muted); font-size: .95rem; }
+.math-trainer .toy-side-handle { outline: none; touch-action: none; }
+.math-trainer .toy-side-line { stroke: transparent; }
+.math-trainer .toy-side-handle:hover .toy-side-line, .math-trainer .toy-side-handle:focus-visible .toy-side-line { stroke: rgba(26, 115, 232, .55); }

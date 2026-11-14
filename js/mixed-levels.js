@@ -24,9 +24,11 @@ const MIXED_LEVELS = {
   'ineq-hard':      ['ineq-product', 'ineq-quadratic', 'ineq-cubic', 'ineq-quartic'],
   // graphs
   'graph-easy':     ['graph-value', 'func-equation'],
-  'graph-medium':   ['func-compare', 'graph-interpret'],
+  'graph-medium':   ['func-compare', 'graph-interpret', 'fg-statements', 'fg-read', 'fg-table'],
+  'graph-hard':     ['fg-intersect'],
   // geometry
-  'geo-basic':      ['geo-perimeter', 'geo-area', 'geo-triangle-sides', 'geo-angles', 'geo-area-figure'],
+  'geo-basic':      ['geo-perimeter', 'geo-area', 'geo-triangle-sides', 'geo-angles', 'geo-area-figure', 'geo-right-triangle'],
+  'geo-cuboid':     ['geo-cuboid-value', 'geo-cuboid-statements'],
   // word problems
   'word-eq':        ['word-parts', 'word-consecutive', 'word-geometry', 'word-system', 'word-modify'],
   'perc-medium':    ['perc-change', 'perc-compare', 'perc-statements', 'perc-points', 'perc-round', 'perc-factor'],

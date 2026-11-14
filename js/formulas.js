@@ -64,7 +64,7 @@ function fmChoice(f, text, question, correct, wrongs, substituted) {
 // ─── the formulas ─────────────────────────────────────────────────────────────
 
 const FM_SIDE = 'side (sivu)', FM_PERIM = 'perimeter (piiri)', FM_AREA = 'area (pinta-ala)', FM_VOL = 'volume (tilavuus)';
-const FM_BASE = 'base (kanta)', FM_HEIGHT = 'height (korkeus)', FM_RADIUS = 'radius (säde)', FM_BASEAREA = 'area of the base (pohjan ala)';
+const FM_BASE = 'base (kanta)', FM_HEIGHT = 'height (korkeus)', FM_RADIUS = 'radius (säde)', FM_BASEAREA = 'area of the base (pohjan pinta-ala)';
 
 const FM_RECT_PERIMETER = {
   id: 'rect-perimeter', name: 'perimeter of a rectangle', fi: 'suorakulmion piiri', latex: 'P = 2a + 2b',
@@ -184,24 +184,25 @@ const FM_PYTHAGORAS = {
 };
 
 const FM_CUBOID_VOLUME = {
-  id: 'cuboid-volume', name: 'volume of a cuboid', fi: 'suorakulmaisen särmiön tilavuus', latex: 'V = a \\cdot b \\cdot c',
-  note: 'Base area $a \\cdot b$ times the height $c$. Volume is measured in cubic units (cm³, m³).',
-  example: 'a = 2,\\ b = 3,\\ c = 4: \\quad V = 2 \\cdot 3 \\cdot 4 = 24',
-  wrong: ['V = a + b + c', 'V = 2(ab + bc + ac)', 'V = a \\cdot b', 'V = \\dfrac{a \\cdot b \\cdot c}{3}'],
-  blanks: [{ tpl: 'V = a \\cdot b \\cdot @@', ans: 'c', wrong: ['a', '2c', '3'] }],
-  symbols: [{ sym: 'V', mean: FM_VOL }],
-  apply() { const a = randInt(2, 10), b = randInt(2, 10), c = randInt(2, 10);
-    return fmValue(this, `A box measures ${a} cm × ${b} cm × ${c} cm.`, 'What is its volume? (in cm³)', a * b * c, `V = ${a} \\cdot ${b} \\cdot ${c} = ${a * b * c}`); },
+  id: 'cuboid-volume', name: 'volume of a cuboid', fi: 'suorakulmaisen särmiön tilavuus', latex: 'V = a \\cdot b \\cdot h',
+  note: 'The base area $a \\cdot b$ times the height $h$: this is the prism formula $V = A_p \\cdot h$ with $A_p = a \\cdot b$. Volume is measured in cubic units (cm³, m³).',
+  example: 'a = 2,\\ b = 3,\\ h = 4: \\quad V = 2 \\cdot 3 \\cdot 4 = 24',
+  wrong: ['V = a + b + h', 'V = 2(ab + ah + bh)', 'V = a \\cdot b', 'V = \\dfrac{a \\cdot b \\cdot h}{3}'],
+  blanks: [{ tpl: 'V = a \\cdot b \\cdot @@', ans: 'h', wrong: ['a', '2h', '3'] }, { tpl: 'V = a \\cdot @@ \\cdot h', ans: 'b', wrong: ['a', '2b', '3'] }],
+  symbols: [{ sym: 'V', mean: FM_VOL }, { sym: 'h', mean: FM_HEIGHT }],
+  apply() { const a = randInt(2, 10), b = randInt(2, 10), h = randInt(2, 10);
+    return fmValue(this, `A cuboid has the base ${a} cm × ${b} cm and the height ${h} cm.`, 'What is its volume? (in cm³)', a * b * h, `V = ${a} \\cdot ${b} \\cdot ${h} = ${a * b * h}`); },
 };
 const FM_CUBOID_SURFACE = {
-  id: 'cuboid-surface', name: 'surface area of a cuboid', fi: 'särmiön pinta-ala', latex: 'S = 2(ab + bc + ac)',
-  note: 'Three pairs of equal faces: $ab$, $bc$ and $ac$, each twice.',
-  example: 'a = 2,\\ b = 3,\\ c = 4: \\quad S = 2(6 + 12 + 8) = 52',
-  wrong: ['S = ab + bc + ac', 'S = 2abc', 'S = 2(a + b + c)', 'S = 6a^2'],
-  blanks: [{ tpl: 'S = @@(ab + bc + ac)', ans: '2', wrong: ['1', '3', '6'] }],
-  symbols: [],
-  apply() { const a = randInt(2, 9), b = randInt(2, 9), c = randInt(2, 9);
-    return fmValue(this, `A box measures ${a} cm × ${b} cm × ${c} cm.`, 'What is the area of its whole surface? (in cm²)', 2 * (a * b + b * c + a * c), `S = 2(${a * b} + ${b * c} + ${a * c}) = ${2 * (a * b + b * c + a * c)}`); },
+  id: 'cuboid-surface', name: 'surface area of a cuboid', fi: 'särmiön pinta-ala', latex: 'A = 2ab + 2ah + 2bh',
+  note: 'Three pairs of equal faces: $ab$ (bottom and top), $ah$ and $bh$ (the sides), each twice. It can also be written $A = 2(ab + ah + bh)$.',
+  example: 'a = 2,\\ b = 3,\\ h = 4: \\quad A = 2 \\cdot 6 + 2 \\cdot 8 + 2 \\cdot 12 = 52',
+  wrong: ['A = ab + ah + bh', 'A = 2abh', 'A = 2(a + b + h)', 'A = 6a^2'],
+  blanks: [{ tpl: 'A = 2ab + 2ah + @@', ans: '2bh', wrong: ['bh', '2abh', '2b + 2h'] }, { tpl: 'A = @@ + 2ah + 2bh', ans: '2ab', wrong: ['ab', '2a + 2b', 'a + b'] }],
+  symbols: [{ sym: 'A', mean: FM_AREA }, { sym: 'h', mean: FM_HEIGHT }],
+  apply() { const a = randInt(2, 9), b = randInt(2, 9), h = randInt(2, 9);
+    return fmValue(this, `A cuboid has the base ${a} cm × ${b} cm and the height ${h} cm.`, 'What is the area of its whole surface? (in cm²)', 2 * a * b + 2 * a * h + 2 * b * h,
+      `A = 2 \\cdot ${a * b} + 2 \\cdot ${a * h} + 2 \\cdot ${b * h} = ${2 * a * b + 2 * a * h + 2 * b * h}`); },
 };
 const FM_CUBE_VOLUME = {
   id: 'cube-volume', name: 'volume of a cube', fi: 'kuution tilavuus', latex: 'V = a^3',
@@ -212,29 +213,29 @@ const FM_CUBE_VOLUME = {
   apply() { const a = randInt(2, 12); return fmValue(this, `A cube has an edge of ${a} cm.`, 'What is its volume? (in cm³)', a ** 3, `V = ${a}^3 = ${a ** 3}`); },
 };
 const FM_CUBE_SURFACE = {
-  id: 'cube-surface', name: 'surface area of a cube', fi: 'kuution pinta-ala', latex: 'S = 6a^2',
-  note: 'A cube has 6 equal square faces, each with the area $a^2$.', example: 'a = 3: \\quad S = 6 \\cdot 9 = 54',
-  wrong: ['S = 6a', 'S = a^3', 'S = 4a^2', 'S = 12a'],
-  blanks: [{ tpl: 'S = @@ \\cdot a^2', ans: '6', wrong: ['4', '3', '12'] }],
-  symbols: [],
-  apply() { const a = randInt(2, 12); return fmValue(this, `A cube has an edge of ${a} cm.`, 'What is the area of its whole surface? (in cm²)', 6 * a * a, `S = 6 \\cdot ${a}^2 = ${6 * a * a}`); },
+  id: 'cube-surface', name: 'surface area of a cube', fi: 'kuution pinta-ala', latex: 'A = 6a^2',
+  note: 'A cube has 6 equal square faces, each with the area $a^2$.', example: 'a = 3: \\quad A = 6 \\cdot 9 = 54',
+  wrong: ['A = 6a', 'A = a^3', 'A = 4a^2', 'A = 12a'],
+  blanks: [{ tpl: 'A = @@ \\cdot a^2', ans: '6', wrong: ['4', '3', '12'] }],
+  symbols: [{ sym: 'A', mean: FM_AREA }],
+  apply() { const a = randInt(2, 12); return fmValue(this, `A cube has an edge of ${a} cm.`, 'What is the area of its whole surface? (in cm²)', 6 * a * a, `A = 6 \\cdot ${a}^2 = ${6 * a * a}`); },
 };
 const FM_PRISM_VOLUME = {
-  id: 'prism-volume', name: 'volume of a prism', fi: 'särmiön tilavuus', latex: 'V = A_b \\cdot h',
-  note: 'Base area times height. It works for any prism and for a cylinder.', example: 'A_b = 12,\\ h = 5: \\quad V = 12 \\cdot 5 = 60',
-  wrong: ['V = \\dfrac{1}{3} A_b h', 'V = A_b + h', 'V = 2 A_b h', 'V = A_b \\cdot h^2'],
-  blanks: [{ tpl: 'V = A_b \\cdot @@', ans: 'h', wrong: ['b', '2h', 'A'] }],
-  symbols: [{ sym: 'V', mean: FM_VOL }, { sym: 'h', mean: FM_HEIGHT }, { sym: 'A_b', mean: FM_BASEAREA }],
+  id: 'prism-volume', name: 'volume of a prism', fi: 'särmiön tilavuus', latex: 'V = A_p \\cdot h',
+  note: 'Base area times height (<i>pohjan pinta-ala · korkeus</i>). It works for any prism and for a cylinder.', example: 'A_p = 12,\\ h = 5: \\quad V = 12 \\cdot 5 = 60',
+  wrong: ['V = \\dfrac{1}{3} A_p h', 'V = A_p + h', 'V = 2 A_p h', 'V = A_p \\cdot h^2'],
+  blanks: [{ tpl: 'V = A_p \\cdot @@', ans: 'h', wrong: ['a', '2h', 'A'] }, { tpl: 'V = @@ \\cdot h', ans: 'A_p', wrong: ['h', 'A', 'V'] }],
+  symbols: [{ sym: 'V', mean: FM_VOL }, { sym: 'h', mean: FM_HEIGHT }, { sym: 'A_p', mean: FM_BASEAREA }],
   apply() { const A = randInt(4, 40), h = randInt(2, 15);
     return fmValue(this, `A prism has a base area of ${A} cm² and the height ${h} cm.`, 'What is its volume? (in cm³)', A * h, `V = ${A} \\cdot ${h} = ${A * h}`); },
 };
 const FM_PYRAMID_VOLUME = {
-  id: 'pyramid-volume', name: 'volume of a pyramid', fi: 'pyramidin tilavuus', latex: 'V = \\dfrac{1}{3} A_b \\cdot h',
+  id: 'pyramid-volume', name: 'volume of a pyramid', fi: 'pyramidin tilavuus', latex: 'V = \\dfrac{1}{3} A_p \\cdot h',
   note: 'A pyramid is one third of the prism with the same base and height. The same holds for a cone.',
-  example: 'A_b = 12,\\ h = 5: \\quad V = \\dfrac{1}{3} \\cdot 12 \\cdot 5 = 20',
-  wrong: ['V = A_b \\cdot h', 'V = \\dfrac{1}{2} A_b h', 'V = 3 A_b h', 'V = \\dfrac{1}{3}(A_b + h)'],
-  blanks: [{ tpl: 'V = @@ A_b \\cdot h', ans: '\\dfrac{1}{3}', wrong: ['\\dfrac{1}{2}', '3', '1'] }],
-  symbols: [{ sym: 'V', mean: FM_VOL }, { sym: 'A_b', mean: FM_BASEAREA }],
+  example: 'A_p = 12,\\ h = 5: \\quad V = \\dfrac{1}{3} \\cdot 12 \\cdot 5 = 20',
+  wrong: ['V = A_p \\cdot h', 'V = \\dfrac{1}{2} A_p h', 'V = 3 A_p h', 'V = \\dfrac{1}{3}(A_p + h)'],
+  blanks: [{ tpl: 'V = @@ A_p \\cdot h', ans: '\\dfrac{1}{3}', wrong: ['\\dfrac{1}{2}', '3', '1'] }],
+  symbols: [{ sym: 'V', mean: FM_VOL }, { sym: 'A_p', mean: FM_BASEAREA }],
   apply() { let A, h; do { A = randInt(3, 30); h = randInt(2, 15); } while ((A * h) % 3 !== 0);
     return fmValue(this, `A pyramid has a base area of ${A} cm² and the height ${h} cm.`, 'What is its volume? (in cm³)', A * h / 3, `V = \\dfrac{1}{3} \\cdot ${A} \\cdot ${h} = ${A * h / 3}`); },
 };

@@ -96,6 +96,12 @@
           <p>Perimeter, area and angles</p>
         </div>
 
+        <div class="topic-card" data-topic="sandbox">
+          <div class="topic-icon">&#x2736;</div>
+          <h2>Sandbox</h2>
+          <p>Visual toys to play with</p>
+        </div>
+
       </section>
     </main>
 
@@ -277,7 +283,15 @@
             <span class="difficulty medium">Intermediate</span>
           </div>
           <h3>Linear Functions — Comparing and Interpreting</h3>
-          <p>Two equations like $D = 6t + 10$ and $E = 3t + 20$: when are they equal? Or choose the statement that matches the graph</p>
+          <p>Two equations like $D = 6t + 10$ and $E = 3t + 20$, a story graph, or $f$ given by an equation and $g$ by a graph: which one grows faster, what is the slope?</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="graph-hard">
+          <div class="subtopic-meta">
+            <span class="difficulty hard">Advanced</span>
+          </div>
+          <h3>Functions — Where Do the Graph and the Equation Meet?</h3>
+          <p>$f$ is given by an equation and $g$ by a graph: read $g$, write its equation and find the $x$ where $f(x) = g(x)$</p>
         </div>
 
       </section>
@@ -409,7 +423,15 @@
             <span class="difficulty easy">Beginner</span>
           </div>
           <h3>Perimeter, Area and Angles</h3>
-          <p>Running around a field, a square from its perimeter, sides and angles of triangles, the area of a triangle from a picture</p>
+          <p>Running around a field, a square from its perimeter, sides and angles of triangles, the area of a triangle from a picture, right triangles and Pythagoras</p>
+        </div>
+
+        <div class="subtopic-card" data-subtopic="geo-cuboid">
+          <div class="subtopic-meta">
+            <span class="difficulty medium">Intermediate</span>
+          </div>
+          <h3>Cuboids — Volume, Surface Area and True Statements</h3>
+          <p>Base area, volume, total surface area of a cuboid, and &ldquo;which statement is NOT true?&rdquo;: read the question carefully</p>
         </div>
 
       </section>
@@ -485,10 +507,122 @@
             <span class="difficulty hard">Advanced</span>
           </div>
           <h3>Geometry — Volumes and Surface Areas</h3>
-          <p>$V = a \cdot b \cdot c$, $V = \pi r^2 h$, $V = \dfrac{4}{3}\pi r^3$, cones and pyramids</p>
+          <p>$V = A_p \cdot h$, $V = a \cdot b \cdot h$, $A = 2ab + 2ah + 2bh$, $V = \pi r^2 h$, $V = \dfrac{4}{3}\pi r^3$, cones and pyramids</p>
         </div>
 
       </section>
+    </main>
+
+    <!-- SANDBOX VIEW: the toys -->
+    <main id="view-sandbox" class="view" data-topic="sandbox">
+      <section class="subtopic-header">
+        <h1>Sandbox</h1>
+        <p>Visual toys to play with: no tasks, no right answers</p>
+      </section>
+
+      <section class="subtopic-list">
+
+        <div class="subtopic-card" data-toy="triangle-area">
+          <h3>A Triangle with a Fixed Area</h3>
+          <p>Drag the top vertex: the angles and the sides change, but the area stays the same</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="rectangle-fixed">
+          <h3>Same Perimeter, Different Area</h3>
+          <p>A rectangle with a fixed perimeter (or a fixed area): which one is the biggest?</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="angle-sum">
+          <h3>Tear Off the Corners</h3>
+          <p>The angles of any triangle fit together into a straight angle: 180°</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="pythagoras">
+          <h3>Squares on the Sides</h3>
+          <p>a² + b² = c², but only when the angle is right</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="area-cutting">
+          <h3>Cut and Move: Where the Area Formulas Come From</h3>
+          <p>A parallelogram becomes a rectangle, two triangles make a parallelogram</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="cuboid-net">
+          <h3>Cuboid: Net and Layers</h3>
+          <p>The surface unfolded into six faces, and the volume built of layers</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="circle-unroll">
+          <h3>Circle: Unroll and Cut</h3>
+          <p>The circumference is about 3.14 diameters; the area as sectors in a row</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="similar-scale">
+          <h3>Scaling a Triangle</h3>
+          <p>The sides grow k times, the area grows k · k times</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="line-sliders">
+          <h3>The Line y = kx + b</h3>
+          <p>Sliders for the slope and the number b: the graph, the slope triangle, the zero and a table of values</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="two-lines">
+          <h3>Two Lines Meet</h3>
+          <p>The common point of two lines is the solution of a system of equations</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="parabola-sliders">
+          <h3>The Parabola y = ax² + bx + c</h3>
+          <p>Sliders for a, b and c: roots, vertex, discriminant and Vieta</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="guess-the-line">
+          <h3>Guess the Line</h3>
+          <p>Three points on a hidden line: set k and b until your line goes through all of them</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="percent-bar">
+          <h3>Percent of What? The Percent Bar</h3>
+          <p>The same part is a different percent of a different whole: the whole is always 100%</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="percent-ladder">
+          <h3>+20%, Then −20%</h3>
+          <p>Two changes in a row are not added: see why you do not get back to the start</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="compound-interest">
+          <h3>Interest on Interest</h3>
+          <p>Money that grows by a percent every year, next to the simple interest</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="fraction-strip">
+          <h3>Fractions, Decimals and Percents</h3>
+          <p>The same amount as a fraction, a decimal and a percent on strips</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="balance-scale">
+          <h3>The Balance: Solve an Equation</h3>
+          <p>Do the same to both sides: the scale stays level until x is alone</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="square-areas">
+          <h3>(a ± b)² as Areas</h3>
+          <p>Where the middle term 2ab comes from, with squares and rectangles</p>
+        </div>
+
+        <div class="subtopic-card" data-toy="roots-vieta">
+          <h3>Roots and Vieta on the Number Line</h3>
+          <p>Drag the two roots: the sum, the product and the equation follow (and back)</p>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- A TOY: filled by TOYS[key].mount (js/sandbox.js) -->
+    <main id="view-toy" class="view">
+      <div class="toy-container" id="toy-root"></div>
     </main>
 
     <!-- PRACTICE VIEW: the actual exercise -->
@@ -585,6 +719,14 @@
   <script src="js/formulas.js"></script>
   <script src="js/figures.js"></script>
   <script src="js/geometry-problems.js"></script>
+  <script src="js/fg-problems.js"></script>
+  <script src="js/sandbox.js"></script>
+  <script src="js/sandbox-kit.js"></script>
+  <script src="js/sandbox-triangle.js"></script>
+  <script src="js/sandbox-percent.js"></script>
+  <script src="js/sandbox-geometry.js"></script>
+  <script src="js/sandbox-graphs.js"></script>
+  <script src="js/sandbox-algebra.js"></script>
   <script src="js/model-problems.js"></script>
   <script src="js/inequalities.js"></script>
   <script src="js/mixed-levels.js"></script>

@@ -7,6 +7,9 @@
  *   geo-triangle-sides   an equilateral / isosceles triangle from its perimeter, the third side
  *   geo-angles           the angles of a triangle (isosceles, right-angled), a straight angle, a quadrilateral
  *   geo-area-figure      the area of a triangle or a parallelogram from a picture with extra, unneeded lengths
+ *   geo-right-triangle   a right triangle: the area from the legs, the hypotenuse, a missing leg (Pythagoras)
+ *   geo-cuboid-value     a cuboid: the base area, the volume, the surface area, the side faces, the height from the volume
+ *   geo-cuboid-statements "which statement is NOT true?" about a cuboid (to practise reading the question carefully)
  *
  * The level `geo-basic` mixes all of them (see mixed-levels.js).
  * Problem: { kind: 'value', text, question, answer, figure?, steps, meta }; all answers are exact (at most 2 decimals).
@@ -231,6 +234,137 @@ function generateGeoAreaFigure() {
   });
 }
 
+// ─── right triangles: the area from the legs, the Pythagorean theorem ────────
+
+const GEO_TRIPLES = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]];
+
+function generateGeoRightTriangle() {
+  const type = pick(['area', 'area', 'hypotenuse', 'hypotenuse', 'leg']);
+  const [a0, b0, c0] = pick(GEO_TRIPLES), k = pick([1, 1, 1, 2, 3]);
+  let a = a0 * k, b = b0 * k; const c = c0 * k;
+  if (randInt(0, 1)) [a, b] = [b, a];                                  // either leg can be the longer one
+  const pts = [[0, 0], [a, 0], [0, b]];                                // the right angle is in the corner 0; sides: a, the hypotenuse, b
+  const figure = (labels) => ({ pts, sides: labels, right: [0], aria: 'A right triangle' });
+
+  if (type === 'area') {
+    const area = a * b / 2, showHyp = randInt(0, 1) === 1;
+    return geoValue(`The legs of a right triangle are ${a} cm and ${b} cm.`, 'Calculate the area of the triangle. (in cm²)', area, [
+      { explanation: TEXTS.geometry.legsBaseHeight, math: `a = ${a}\\ \\text{cm}, \\quad h = ${b}\\ \\text{cm}` },
+      { explanation: TEXTS.formulas.useFormula('area of a triangle'), math: 'A = \\dfrac{a \\cdot h}{2}' },
+      { explanation: TEXTS.formulas.putNumbers, math: `A = \\dfrac{${a} \\cdot ${b}}{2} = ${area}\\ \\text{cm}^2` },
+    ], { type, a, b, c, area }, figure([`${a} cm`, showHyp ? `${c} cm` : '', `${b} cm`]));
+  }
+  if (type === 'hypotenuse') {
+    return geoValue(`The legs of a right triangle are ${a} cm and ${b} cm.`, 'Calculate the length of the hypotenuse. (in cm)', c, [
+      { explanation: TEXTS.geometry.pythagorasHypotenuse, math: `c^2 = ${a}^2 + ${b}^2 = ${a * a} + ${b * b} = ${c * c}` },
+      { explanation: TEXTS.geometry.squareRoot, math: `c = \\sqrt{${c * c}} = ${c}\\ \\text{cm}` },
+    ], { type, a, b, c }, figure([`${a} cm`, '?', `${b} cm`]));
+  }
+  return geoValue(`The hypotenuse of a right triangle is ${c} cm and one of the legs is ${a} cm.`, 'Calculate the length of the other leg. (in cm)', b, [
+    { explanation: TEXTS.geometry.pythagorasLeg, math: `b^2 = ${c}^2 - ${a}^2 = ${c * c} - ${a * a} = ${b * b}` },
+    { explanation: TEXTS.geometry.squareRoot, math: `b = \\sqrt{${b * b}} = ${b}\\ \\text{cm}` },
+  ], { type: 'leg', a, b, c }, figure([`${a} cm`, `${c} cm`, '?']));
+}
+
+// ─── cuboids (suorakulmainen särmiö) ──────────────────────────────────────────
+
+/** Edges with at most 2 decimals in the results: at least one of the base sides is a whole number */
+function geoCuboidSize() {
+  for (;;) {
+    const half = () => randInt(2, 16) * 0.5, whole = () => randInt(2, 9);
+    const [a, b] = randInt(0, 1) ? [whole(), half()] : [half(), whole()];
+    const h = randInt(2, 12) * 0.5;
+    if (a !== b) return { a, b, h };
+  }
+}
+
+const geoCuboidFigure = (a, b, h, unknown) => ({
+  cuboid: { a, b, h },
+  labels: { a: unknown === 'a' ? '?' : geoCm(a), b: unknown === 'b' ? '?' : geoCm(b), h: unknown === 'h' ? '?' : geoCm(h) },
+  aria: `A cuboid with the base ${geoCm(a)} by ${geoCm(b)} and the height ${geoCm(h)}`,
+});
+
+const geoCuboidText = (a, b, h) => `The base of a cuboid measures ${geoCm(a)} × ${geoCm(b)} and the height of the cuboid is ${geoCm(h)}.`;
+
+/** Base area, volume, surface area, side faces and the height from the volume of a cuboid */
+function generateGeoCuboid() {
+  const type = pick(['volume', 'volume', 'base', 'surface', 'surface', 'sides', 'height']);
+  const { a, b, h } = geoCuboidSize();
+  const base = a * b, vol = base * h, surf = 2 * base + 2 * a * h + 2 * b * h, sides = 2 * a * h + 2 * b * h;
+  const text = geoCuboidText(a, b, h), fig = geoCuboidFigure(a, b, h);
+  const n = geoNum;
+
+  if (type === 'base') {
+    return geoValue(text, 'What is the area of the base? (in cm²)', base, [
+      { explanation: TEXTS.geometry.baseAreaCuboid, math: `A_p = a \\cdot b = ${n(a)} \\cdot ${n(b)} = ${n(base)}\\ \\text{cm}^2` },
+    ], { type: 'cuboid-base', a, b, h }, fig);
+  }
+  if (type === 'volume') {
+    return geoValue(text, 'What is the volume of the cuboid? (in cm³)', vol, [
+      { explanation: TEXTS.geometry.baseAreaCuboid, math: `A_p = ${n(a)} \\cdot ${n(b)} = ${n(base)}\\ \\text{cm}^2` },
+      { explanation: TEXTS.geometry.volumePrism, math: `V = A_p \\cdot h = ${n(base)} \\cdot ${n(h)} = ${n(vol)}\\ \\text{cm}^3` },
+    ], { type: 'cuboid-volume', a, b, h }, fig);
+  }
+  if (type === 'surface') {
+    return geoValue(text, 'What is the total surface area of the cuboid? (in cm²)', surf, [
+      { explanation: TEXTS.geometry.sixFaces, math: `A = 2ab + 2ah + 2bh` },
+      { explanation: TEXTS.formulas.putNumbers, math: `A = 2 \\cdot ${n(base)} + 2 \\cdot ${n(a * h)} + 2 \\cdot ${n(b * h)} = ${n(2 * base)} + ${n(2 * a * h)} + ${n(2 * b * h)} = ${n(surf)}\\ \\text{cm}^2` },
+    ], { type: 'cuboid-surface', a, b, h }, fig);
+  }
+  if (type === 'sides') {
+    return geoValue(text, 'What is the total area of the four side faces (without the bottom and the top)? (in cm²)', sides, [
+      { explanation: TEXTS.geometry.sideFaces, math: `A_{sides} = 2ah + 2bh = 2 \\cdot ${n(a * h)} + 2 \\cdot ${n(b * h)} = ${n(sides)}\\ \\text{cm}^2` },
+    ], { type: 'cuboid-sides', a, b, h }, fig);
+  }
+  return geoValue(`The base of a cuboid measures ${geoCm(a)} × ${geoCm(b)} and the volume of the cuboid is ${n(vol)} cm³.`, 'How high is the cuboid? (in cm)', h, [
+    { explanation: TEXTS.geometry.baseAreaCuboid, math: `A_p = ${n(a)} \\cdot ${n(b)} = ${n(base)}\\ \\text{cm}^2` },
+    { explanation: TEXTS.geometry.heightFromVolume, math: `h = \\dfrac{V}{A_p} = \\dfrac{${n(vol)}}{${n(base)}} = ${n(h)}\\ \\text{cm}` },
+  ], { type: 'cuboid-height', a, b, h, vol }, geoCuboidFigure(a, b, h, 'h'));
+}
+
+/**
+ * "Which statement is NOT true?": three statements about a cuboid, two of them true and one wrong
+ * (or: which one is true, when only one is). The wrong values come from typical mistakes.
+ */
+function generateGeoCuboidStatements() {
+  const { a, b, h } = geoCuboidSize();
+  const n = geoNum, base = a * b, vol = base * h, surf = 2 * base + 2 * a * h + 2 * b * h, sides = 2 * a * h + 2 * b * h, per = 2 * (a + b);
+  // each quantity: the statement text, the right value, the typical wrong values (each different from the right one)
+  const quantities = [
+    { key: 'base', text: v => `The area of the base is ${n(v)} cm².`, right: base, formula: `A_p = ${n(a)} \\cdot ${n(b)} = ${n(base)}`, wrong: [per, a * h, b * h, a + b] },
+    { key: 'volume', text: v => `The volume of the cuboid is ${n(v)} cm³.`, right: vol, formula: `V = A_p \\cdot h = ${n(base)} \\cdot ${n(h)} = ${n(vol)}`, wrong: [base * 2 * h, (a + b) * h, base + h, vol / 2, base] },
+    { key: 'surface', text: v => `The total surface area of the cuboid is ${n(v)} cm².`, right: surf,
+      formula: `A = 2ab + 2ah + 2bh = ${n(2 * base)} + ${n(2 * a * h)} + ${n(2 * b * h)} = ${n(surf)}`, wrong: [surf - 2 * b * h, surf - 2 * base, surf / 2, base + a * h + b * h, 2 * vol, surf + 10, surf - 5] },
+    { key: 'sides', text: v => `The side faces of the cuboid have the total area ${n(v)} cm².`, right: sides, formula: `A_{sides} = 2ah + 2bh = ${n(2 * a * h)} + ${n(2 * b * h)} = ${n(sides)}`, wrong: [a * h + b * h, surf, sides + 2 * base, sides - 5, sides + 10] },
+    { key: 'perimeter', text: v => `The perimeter of the base is ${n(v)} cm.`, right: per, formula: `P = 2a + 2b = ${n(2 * a)} + ${n(2 * b)} = ${n(per)}`, wrong: [a + b, base, 2 * a * b, per + 2] },
+  ];
+  const chosen = pcShuffle(quantities).slice(0, 3);
+  const notTrue = randInt(1, 4) <= 3;                               // mostly "which is NOT true": the one that catches the careless reader
+  const oddOne = randInt(0, 2);                                     // the position of the different statement
+  const eq = (x, y) => Math.abs(x - y) < 1e-9;
+  const statements = chosen.map((q, i) => {
+    const isOdd = i === oddOne;
+    const truthful = notTrue ? !isOdd : isOdd;                      // notTrue: the odd one is wrong; otherwise the odd one is the only true one
+    const candidates = q.wrong.filter(v => v > 0 && !eq(v, q.right));
+    const value = truthful ? q.right : pick(candidates);
+    return { q, value, truthful, text: q.text(value) };
+  });
+  if (new Set(statements.map(s => s.text)).size < 3) return generateGeoCuboidStatements();
+  const target = statements.findIndex(s => s.truthful === !notTrue);   // the answer: the false one (notTrue) or the true one
+  const steps = statements.map((s, i) => ({
+    explanation: `Statement ${i + 1}: ${s.q.key === 'base' ? TEXTS.geometry.checkBase : s.q.key === 'volume' ? TEXTS.geometry.checkVolume : s.q.key === 'surface' ? TEXTS.geometry.checkSurface : s.q.key === 'sides' ? TEXTS.geometry.checkSides : TEXTS.geometry.checkPerimeter}`,
+    math: `${s.q.formula}\\ \\Rightarrow\\ \\text{${s.truthful ? 'true' : `false (the statement says ${n(s.value)})`}}`,
+  }));
+  steps.push({ explanation: notTrue ? TEXTS.geometry.theFalseOne(target + 1) : TEXTS.geometry.theTrueOne(target + 1) });
+  return {
+    kind: 'choice', text: geoCuboidText(a, b, h),
+    question: notTrue ? 'Which statement is NOT true?' : 'Which statement is true?',
+    options: statements.map(s => s.text), answer: target, steps,
+    figure: geoCuboidFigure(a, b, h),
+    meta: { type: 'cuboid-statements', a, b, h, notTrue, kinds: chosen.map(q => q.key), truth: statements.map(s => s.truthful) },
+  };
+}
+
 // ─── register with the shared generator table (defined in equations.js) ──────
 Object.assign(GENERATORS, {
   'geo-perimeter':      generateGeoPerimeter,
@@ -238,4 +372,7 @@ Object.assign(GENERATORS, {
   'geo-triangle-sides': generateGeoTriangleSides,
   'geo-angles':         generateGeoAngles,
   'geo-area-figure':    generateGeoAreaFigure,
+  'geo-right-triangle': generateGeoRightTriangle,
+  'geo-cuboid-value':      generateGeoCuboid,
+  'geo-cuboid-statements': generateGeoCuboidStatements,
 });
